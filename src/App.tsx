@@ -6,7 +6,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import EventDetails from "./pages/EventDetails";
+import Checkout from "./pages/Checkout";
 import MyTickets from "./pages/MyTickets";
+import OrganizerDashboard from "./pages/OrganizerDashboard";
+import CreateOrganizer from "./pages/CreateOrganizer";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,7 +25,11 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/events/:id" element={<EventDetails />} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route path="/my-tickets" element={<MyTickets />} />
+            <Route path="/organizer-dashboard" element={<OrganizerDashboard />} />
+            <Route path="/create-organizer" element={<CreateOrganizer />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
