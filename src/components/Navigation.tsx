@@ -27,6 +27,9 @@ export const Navigation = () => {
                 <Link to="/my-tickets">
                   <Button variant="ghost">My Tickets</Button>
                 </Link>
+                <Link to="/organizer-dashboard">
+                  <Button variant="ghost">Dashboard</Button>
+                </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon">
