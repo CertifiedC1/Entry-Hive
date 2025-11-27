@@ -22,9 +22,9 @@ const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'stripe' | 'paypal'>('mpesa');
+  const [paymentMethod, setPaymentMethod] = useState<'paystack'>('paystack');
   const [processing, setProcessing] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [email, setEmail] = useState('');
   
   const state = location.state as CheckoutState;
 
@@ -44,63 +44,24 @@ const Checkout = () => {
     setProcessing(true);
 
     try {
-      if (paymentMethod === 'mpesa') {
-        if (!phoneNumber || phoneNumber.length < 10) {
-          toast.error('Please enter a valid phone number');
-          setProcessing(false);
-          return;
-        }
-
-        // Call Mpesa payment edge function
-        const { data, error } = await supabase.functions.invoke('process-mpesa-payment', {
-          body: {
-            phoneNumber,
-            amount: state.totalAmount,
-            eventId: state.eventId,
-            selectedTickets: state.selectedTickets,
-          },
-        });
-
-        if (error) throw error;
-        
-        toast.success('Payment initiated! Please check your phone for the M-Pesa prompt.');
-        toast.info('You will receive your tickets via email and SMS once payment is confirmed.');
-        
-        // Redirect to success page
-        setTimeout(() => {
-          navigate('/my-tickets');
-        }, 3000);
-      } else if (paymentMethod === 'stripe') {
-        // Call Stripe payment edge function
-        const { data, error } = await supabase.functions.invoke('process-stripe-payment', {
-          body: {
-            amount: state.totalAmount,
-            eventId: state.eventId,
-            selectedTickets: state.selectedTickets,
-          },
-        });
-
-        if (error) throw error;
-
-        if (data.url) {
-          window.location.href = data.url;
-        }
-      } else if (paymentMethod === 'paypal') {
-        // Call PayPal payment edge function
-        const { data, error } = await supabase.functions.invoke('process-paypal-payment', {
-          body: {
-            amount: state.totalAmount,
-            eventId: state.eventId,
-            selectedTickets: state.selectedTickets,
-          },
-        });
-
-        if (error) throw error;
-
-        if (data.approvalUrl) {
-          window.location.href = data.approvalUrl;
-        }
+      if (!email || !email.includes('@')) {
+        toast.error('Please enter a valid email address');
+        setProcessing(false);
+        return;
       }
+
+      // Call Paystack payment edge function (placeholder for now)
+      toast.info('Payment integration coming soon! Paystack will be integrated once API keys are configured.');
+      
+      // Placeholder: Simulate successful payment for development
+      toast.success('Demo: Payment would be processed via Paystack');
+      toast.info('In production, you will be redirected to Paystack payment page.');
+      
+      // For now, just navigate to tickets page after a delay
+      setTimeout(() => {
+        navigate('/my-tickets');
+      }, 2000);
+
     } catch (error: any) {
       console.error('Payment error:', error);
       toast.error(error.message || 'Payment failed. Please try again.');
@@ -135,66 +96,43 @@ const Checkout = () => {
 
             {/* Payment Method Selection */}
             <div className="space-y-4">
-              <Label>Select Payment Method</Label>
-              <RadioGroup value={paymentMethod} onValueChange={(value: any) => setPaymentMethod(value)}>
-                <div className="flex items-center space-x-2 rounded-lg border p-4">
-                  <RadioGroupItem value="mpesa" id="mpesa" />
-                  <Label htmlFor="mpesa" className="flex flex-1 cursor-pointer items-center gap-2">
-                    <Smartphone className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="font-semibold">M-Pesa</p>
-                      <p className="text-sm text-muted-foreground">Pay via M-Pesa STK Push</p>
-                    </div>
-                  </Label>
+              <Label>Payment Method</Label>
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                <div className="flex items-center gap-3">
+                  <CreditCard className="h-6 w-6 text-primary" />
+                  <div className="flex-1">
+                    <p className="font-semibold">Paystack</p>
+                    <p className="text-sm text-muted-foreground">Secure payment via Paystack - Cards, Bank Transfer, Mobile Money</p>
+                  </div>
                 </div>
-
-                <div className="flex items-center space-x-2 rounded-lg border p-4">
-                  <RadioGroupItem value="stripe" id="stripe" />
-                  <Label htmlFor="stripe" className="flex flex-1 cursor-pointer items-center gap-2">
-                    <CreditCard className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="font-semibold">Credit/Debit Card</p>
-                      <p className="text-sm text-muted-foreground">Pay with Visa, Mastercard, etc.</p>
-                    </div>
-                  </Label>
-                </div>
-
-                <div className="flex items-center space-x-2 rounded-lg border p-4">
-                  <RadioGroupItem value="paypal" id="paypal" />
-                  <Label htmlFor="paypal" className="flex flex-1 cursor-pointer items-center gap-2">
-                    <CreditCard className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="font-semibold">PayPal</p>
-                      <p className="text-sm text-muted-foreground">Pay with your PayPal account</p>
-                    </div>
-                  </Label>
-                </div>
-              </RadioGroup>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Payment is processed securely through Paystack. Supports Visa, Mastercard, Bank Transfer, and Mobile Money.
+              </p>
             </div>
 
-            {/* M-Pesa Phone Number Input */}
-            {paymentMethod === 'mpesa' && (
-              <div className="space-y-2">
-                <Label htmlFor="phone">M-Pesa Phone Number</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="254712345678"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  maxLength={12}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Enter your M-Pesa registered phone number (e.g., 254712345678)
-                </p>
-              </div>
-            )}
+            <Separator />
+
+            {/* Email Input */}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your.email@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Your tickets will be sent to this email address
+              </p>
+            </div>
 
             <Button
               className="w-full"
               size="lg"
               onClick={handlePayment}
-              disabled={processing || (paymentMethod === 'mpesa' && !phoneNumber)}
+              disabled={processing || !email}
             >
               {processing ? (
                 <>
@@ -205,6 +143,10 @@ const Checkout = () => {
                 `Pay KES ${state.totalAmount.toLocaleString()}`
               )}
             </Button>
+            
+            <p className="text-center text-xs text-muted-foreground">
+              Note: Payment integration is in demo mode. Paystack will be fully integrated once API keys are configured.
+            </p>
           </CardContent>
         </Card>
       </div>
