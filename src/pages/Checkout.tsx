@@ -24,7 +24,11 @@ const Checkout = () => {
   const { user } = useAuth();
   const [paymentMethod, setPaymentMethod] = useState<'paystack'>('paystack');
   const [processing, setProcessing] = useState(false);
-  const [email, setEmail] = useState('');
+  const [customerInfo, setCustomerInfo] = useState({
+    name: '',
+    email: '',
+    phone: ''
+  });
   
   const state = location.state as CheckoutState;
 
@@ -39,32 +43,43 @@ const Checkout = () => {
   }
 
   const handlePayment = async () => {
-    if (!user) return;
+    if (!user) {
+      toast.error('Please sign in to complete your purchase');
+      navigate('/auth');
+      return;
+    }
+
+    if (!customerInfo.name || !customerInfo.email) {
+      toast.error('Please provide your name and email');
+      return;
+    }
 
     setProcessing(true);
 
     try {
-      if (!email || !email.includes('@')) {
-        toast.error('Please enter a valid email address');
-        setProcessing(false);
-        return;
-      }
+      const { data, error } = await supabase.functions.invoke('process-payment', {
+        body: {
+          eventId: state.eventId,
+          tickets: Object.entries(state.selectedTickets)
+            .filter(([_, qty]) => qty > 0)
+            .map(([ticketTypeId, quantity]) => ({ ticketTypeId, quantity })),
+          paymentMethod: paymentMethod,
+          customerInfo: customerInfo,
+          totalAmount: state.totalAmount
+        }
+      });
 
-      // Call Paystack payment edge function (placeholder for now)
-      toast.info('Payment integration coming soon! Paystack will be integrated once API keys are configured.');
-      
-      // Placeholder: Simulate successful payment for development
-      toast.success('Demo: Payment would be processed via Paystack');
-      toast.info('In production, you will be redirected to Paystack payment page.');
-      
-      // For now, just navigate to tickets page after a delay
-      setTimeout(() => {
+      if (error) throw error;
+
+      if (data?.success) {
+        toast.success('Payment successful! Your tickets have been sent to your email');
         navigate('/my-tickets');
-      }, 2000);
-
+      } else {
+        throw new Error(data?.error || 'Payment failed');
+      }
     } catch (error: any) {
       console.error('Payment error:', error);
-      toast.error(error.message || 'Payment failed. Please try again.');
+      toast.error(error?.message || 'Payment failed. Please try again.');
     } finally {
       setProcessing(false);
     }
@@ -113,31 +128,54 @@ const Checkout = () => {
 
             <Separator />
 
-            {/* Email Input */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your.email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Your tickets will be sent to this email address
-              </p>
+            {/* Customer Information */}
+            <div className="space-y-4">
+              <h3 className="font-semibold">Customer Information</h3>
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="John Doe"
+                  value={customerInfo.name}
+                  onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your.email@example.com"
+                  value={customerInfo.email}
+                  onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Your tickets will be sent to this email address
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+254 712 345 678"
+                  value={customerInfo.phone}
+                  onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
+                />
+              </div>
             </div>
 
             <Button
               className="w-full"
               size="lg"
               onClick={handlePayment}
-              disabled={processing || !email}
+              disabled={processing || !customerInfo.name || !customerInfo.email}
             >
               {processing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
+                  Processing Payment...
                 </>
               ) : (
                 `Pay KES ${state.totalAmount.toLocaleString()}`
@@ -145,7 +183,7 @@ const Checkout = () => {
             </Button>
             
             <p className="text-center text-xs text-muted-foreground">
-              Note: Payment integration is in demo mode. Paystack will be fully integrated once API keys are configured.
+              Secure payment processing. Your tickets will be delivered within 30 seconds.
             </p>
           </CardContent>
         </Card>
