@@ -107,33 +107,33 @@ const Index = () => {
       <Navigation />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary to-accent py-20 text-primary-foreground">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="mb-4 text-4xl font-bold md:text-5xl lg:text-6xl">
-            Discover Amazing Events
-          </h1>
-          <p className="mb-8 text-lg md:text-xl">
-            Book tickets for concerts, sports, conferences, and more
-          </p>
-          
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="mx-auto max-w-2xl">
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <section className="relative overflow-hidden bg-gradient-to-b from-background via-background/95 to-background py-32">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48Y2lyY2xlIGN4PSIyIiBjeT0iMiIgcj0iMSIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2EpIi8+PC9zdmc+')] opacity-30"></div>
+        
+        <div className="container relative mx-auto px-4">
+          <div className="mx-auto max-w-4xl text-center">
+            <h1 className="mb-6 text-5xl font-bold tracking-tight text-foreground sm:text-6xl md:text-7xl">
+              Let there be live
+            </h1>
+            <p className="mb-12 text-xl text-foreground/80">
+              Your next best-night-ever is waiting
+            </p>
+            
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="mx-auto max-w-3xl">
+              <div className="relative">
+                <Search className="absolute left-6 top-1/2 h-6 w-6 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Search for events..."
+                  placeholder="What do you want to see live?"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-background"
+                  className="h-16 rounded-full bg-card pl-16 text-lg shadow-xl"
                 />
               </div>
-              <Button type="submit" variant="secondary">
-                Search
-              </Button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </section>
 
