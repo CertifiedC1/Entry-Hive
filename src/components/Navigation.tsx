@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Ticket, User, LogOut } from 'lucide-react';
+import { Ticket, User, LogOut, ScanLine, Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import {
   DropdownMenu,
@@ -29,6 +29,18 @@ export const Navigation = () => {
                 </Link>
                 <Link to="/organizer-dashboard">
                   <Button variant="ghost">Dashboard</Button>
+                </Link>
+                <Link to="/ticket-scanner">
+                  <Button variant="ghost">
+                    <ScanLine className="h-4 w-4 mr-2" />
+                    Scanner
+                  </Button>
+                </Link>
+                <Link to="/admin-dashboard">
+                  <Button variant="ghost">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Admin
+                  </Button>
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

@@ -11,6 +11,8 @@ import Checkout from "./pages/Checkout";
 import MyTickets from "./pages/MyTickets";
 import OrganizerDashboard from "./pages/OrganizerDashboard";
 import CreateOrganizer from "./pages/CreateOrganizer";
+import TicketScanner from "./pages/TicketScanner";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +32,8 @@ const App = () => (
             <Route path="/my-tickets" element={<MyTickets />} />
             <Route path="/organizer-dashboard" element={<OrganizerDashboard />} />
             <Route path="/create-organizer" element={<CreateOrganizer />} />
+            <Route path="/ticket-scanner" element={<TicketScanner />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
