@@ -13,6 +13,10 @@ import OrganizerDashboard from "./pages/OrganizerDashboard";
 import CreateOrganizer from "./pages/CreateOrganizer";
 import TicketScanner from "./pages/TicketScanner";
 import AdminDashboard from "./pages/AdminDashboard";
+import AboutUs from "./pages/AboutUs";
+import ContactUs from "./pages/ContactUs";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +38,10 @@ const App = () => (
             <Route path="/create-organizer" element={<CreateOrganizer />} />
             <Route path="/ticket-scanner" element={<TicketScanner />} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="/contact" element={<ContactUs />} />
+            <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
