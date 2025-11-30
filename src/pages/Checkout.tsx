@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
+import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
-import { CreditCard, Smartphone, Loader2 } from 'lucide-react';
+import { CreditCard, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -86,108 +84,101 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
-      <div className="container mx-auto max-w-2xl px-4 py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Complete Your Purchase</CardTitle>
-            <CardDescription>Choose your payment method and complete the transaction</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Order Summary */}
-            <div className="rounded-lg bg-muted p-4">
-              <h3 className="mb-2 font-semibold">Order Summary</h3>
-              <div className="flex justify-between">
-                <span>Total Amount:</span>
-                <span className="text-lg font-bold text-primary">
-                  KES {state.totalAmount.toLocaleString()}
-                </span>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Payment Method Selection */}
-            <div className="space-y-4">
-              <Label>Payment Method</Label>
-              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                <div className="flex items-center gap-3">
-                  <CreditCard className="h-6 w-6 text-primary" />
-                  <div className="flex-1">
-                    <p className="font-semibold">Paystack</p>
-                    <p className="text-sm text-muted-foreground">Secure payment via Paystack - Cards, Bank Transfer, Mobile Money</p>
+      <div className="container mx-auto max-w-4xl px-4 py-8 flex-1">
+        <h1 className="text-3xl font-bold mb-8">Order Confirmation</h1>
+        
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Payment Method */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Pay with</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                  <div className="flex items-center gap-3">
+                    <CreditCard className="h-6 w-6 text-primary" />
+                    <div className="flex-1">
+                      <p className="font-semibold">Paystack</p>
+                      <p className="text-sm text-muted-foreground">
+                        Secure payment via Paystack - Cards, Bank Transfer, Mobile Money
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Payment is processed securely through Paystack. Supports Visa, Mastercard, Bank Transfer, and Mobile Money.
-              </p>
-            </div>
-
-            <Separator />
-
-            {/* Customer Information */}
-            <div className="space-y-4">
-              <h3 className="font-semibold">Customer Information</h3>
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="John Doe"
-                  value={customerInfo.name}
-                  onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your.email@example.com"
-                  value={customerInfo.email}
-                  onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
-                />
                 <p className="text-xs text-muted-foreground">
-                  Your tickets will be sent to this email address
+                  Payment is processed securely through Paystack. Supports Visa, Mastercard, Bank Transfer, and Mobile Money.
                 </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+254 712 345 678"
-                  value={customerInfo.phone}
-                  onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
-                />
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            <Button
-              className="w-full"
-              size="lg"
-              onClick={handlePayment}
-              disabled={processing || !customerInfo.name || !customerInfo.email}
-            >
-              {processing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing Payment...
-                </>
-              ) : (
-                `Pay KES ${state.totalAmount.toLocaleString()}`
-              )}
-            </Button>
-            
-            <p className="text-center text-xs text-muted-foreground">
-              Secure payment processing. Your tickets will be delivered within 30 seconds.
-            </p>
-          </CardContent>
-        </Card>
+            {/* Billing Address */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Billing Address</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-sm">
+                  <p className="font-semibold">{customerInfo.name}</p>
+                  <p>{customerInfo.email}</p>
+                  <p>{customerInfo.phone}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Order Summary */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Order Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Subtotal:</span>
+                    <span>KES {state.totalAmount.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Taxes:</span>
+                    <span>KES 0.00</span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between font-bold text-lg">
+                    <span>Total:</span>
+                    <span className="text-primary">KES {state.totalAmount.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={handlePayment}
+                  disabled={processing || !customerInfo.name || !customerInfo.email}
+                >
+                  {processing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing Payment...
+                    </>
+                  ) : (
+                    'Pay Now'
+                  )}
+                </Button>
+                
+                <p className="text-center text-xs text-muted-foreground">
+                  Secure payment processing. Your tickets will be delivered within 30 seconds.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
+      
+      <Footer />
     </div>
   );
 };

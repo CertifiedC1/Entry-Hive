@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Navigation } from '@/components/Navigation';
+import { Footer } from '@/components/Footer';
 import { EventCard } from '@/components/EventCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -103,21 +104,23 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-background via-background/95 to-background py-32">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent"></div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48Y2lyY2xlIGN4PSIyIiBjeT0iMiIgcj0iMSIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2EpIi8+PC9zdmc+')] opacity-30"></div>
-        
+      {/* Hero Section with Unsplash Background */}
+      <section 
+        className="relative overflow-hidden py-32 bg-cover bg-center"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1600&q=80')`
+        }}
+      >
         <div className="container relative mx-auto px-4">
           <div className="mx-auto max-w-4xl text-center">
-            <h1 className="mb-6 text-5xl font-bold tracking-tight text-foreground sm:text-6xl md:text-7xl">
-              Let there be live
+            <h1 className="mb-6 text-5xl font-bold tracking-tight text-white sm:text-6xl md:text-7xl">
+              Welcome
             </h1>
-            <p className="mb-12 text-xl text-foreground/80">
-              Your next best-night-ever is waiting
+            <p className="mb-12 text-xl text-white/90">
+              Discover and book tickets to amazing events
             </p>
             
             {/* Search Bar */}
@@ -126,10 +129,10 @@ const Index = () => {
                 <Search className="absolute left-6 top-1/2 h-6 w-6 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="What do you want to see live?"
+                  placeholder="Search an event..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-16 rounded-full bg-card pl-16 text-lg shadow-xl"
+                  className="h-16 rounded-full bg-white pl-16 text-lg shadow-xl"
                 />
               </div>
             </form>
@@ -140,13 +143,14 @@ const Index = () => {
       {/* Categories */}
       <section className="border-b bg-card py-6">
         <div className="container mx-auto px-4">
+          <h2 className="text-2xl font-bold mb-4">Popular Events</h2>
           <div className="flex flex-wrap gap-2">
             <Badge
               variant={selectedCategory === null ? 'default' : 'outline'}
               className="cursor-pointer"
               onClick={() => setSelectedCategory(null)}
             >
-              All Events
+              All
             </Badge>
             {categories.map((category) => (
               <Badge
@@ -155,7 +159,7 @@ const Index = () => {
                 className="cursor-pointer"
                 onClick={() => setSelectedCategory(category.id)}
               >
-                {category.icon} {category.name}
+                {category.name}
               </Badge>
             ))}
           </div>
@@ -163,7 +167,7 @@ const Index = () => {
       </section>
 
       {/* Events Grid */}
-      <section className="py-12">
+      <section className="py-12 flex-1">
         <div className="container mx-auto px-4">
           {loading ? (
             <div className="flex items-center justify-center py-12">
@@ -183,7 +187,7 @@ const Index = () => {
                   id={event.id}
                   title={event.title}
                   description={event.description}
-                  bannerUrl={event.banner_url || undefined}
+                  bannerUrl={event.banner_url || `https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&q=80`}
                   venue={event.venue}
                   location={event.location}
                   eventDate={event.event_date}
@@ -199,6 +203,8 @@ const Index = () => {
           )}
         </div>
       </section>
+      
+      <Footer />
     </div>
   );
 };
