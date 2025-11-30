@@ -1,4 +1,5 @@
 import { Navigation } from '@/components/Navigation';
+import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Ticket, Calendar, MapPin, Download, QrCode } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -6,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface TicketWithEvent {
   id: string;
@@ -106,17 +108,18 @@ const MyTickets = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <Navigation />
         <div className="container mx-auto px-4 py-8">
           <p className="text-center text-muted-foreground">Loading your tickets...</p>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
@@ -204,29 +207,40 @@ const MyTickets = () => {
                       </div>
                     </div>
 
-                    <div className="mt-6 flex gap-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => downloadTicket(ticket)}
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          navigator.clipboard.writeText(ticket.qr_code);
-                          toast({
-                            title: 'QR Code Copied',
-                            description: 'QR code data copied to clipboard'
-                          });
-                        }}
-                      >
-                        <QrCode className="h-4 w-4 mr-2" />
-                        Copy QR Code
-                      </Button>
+                    {/* QR Code Display */}
+                    <div className="mt-6 pt-6 border-t flex flex-col items-center gap-4">
+                      <p className="text-sm font-semibold text-muted-foreground">Scan at venue</p>
+                      <QRCodeSVG 
+                        id={`qr-${ticket.ticket_number}`}
+                        value={ticket.qr_code} 
+                        size={180}
+                        level="H"
+                        includeMargin={true}
+                      />
+                      <div className="flex gap-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => downloadTicket(ticket)}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            navigator.clipboard.writeText(ticket.qr_code);
+                            toast({
+                              title: 'QR Code Copied',
+                              description: 'QR code data copied to clipboard'
+                            });
+                          }}
+                        >
+                          <QrCode className="h-4 w-4 mr-2" />
+                          Copy QR
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -235,6 +249,7 @@ const MyTickets = () => {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 };
