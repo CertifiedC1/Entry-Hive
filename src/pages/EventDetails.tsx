@@ -126,8 +126,8 @@ const EventDetails = () => {
       return;
     }
 
-    // Navigate to checkout page with ticket selection
-    navigate('/checkout', {
+    // Navigate to attendee details page
+    navigate('/attendee-details', {
       state: {
         eventId: id,
         selectedTickets,
