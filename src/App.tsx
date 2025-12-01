@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
+import AttendeeDetails from "./pages/AttendeeDetails";
+import CreateEvent from "./pages/CreateEvent";
 import Auth from "./pages/Auth";
 import EventDetails from "./pages/EventDetails";
 import Checkout from "./pages/Checkout";
@@ -32,9 +34,11 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/events/:id" element={<EventDetails />} />
+            <Route path="/attendee-details" element={<AttendeeDetails />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/my-tickets" element={<MyTickets />} />
             <Route path="/organizer-dashboard" element={<OrganizerDashboard />} />
+            <Route path="/create-event" element={<CreateEvent />} />
             <Route path="/create-organizer" element={<CreateOrganizer />} />
             <Route path="/ticket-scanner" element={<TicketScanner />} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />

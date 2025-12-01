@@ -8,7 +8,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, phoneNumber: string, role: 'customer' | 'organizer') => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -41,23 +41,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, phoneNumber: string, role: 'customer' | 'organizer') => {
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: fullName,
+            phone_number: phoneNumber,
+            role,
           },
         },
       });
 
       if (error) throw error;
       
+      // If organizer, create organizer profile
+      if (data.user && role === 'organizer') {
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({ user_id: data.user.id, role: 'organizer' });
+        
+        if (roleError) console.error('Role assignment error:', roleError);
+      }
+      
       toast.success('Account created! Please check your email to verify.');
-      navigate('/');
+      if (role === 'organizer') {
+        navigate('/create-organizer');
+      } else {
+        navigate('/');
+      }
     } catch (error: any) {
       toast.error(error.message || 'Failed to sign up');
       throw error;

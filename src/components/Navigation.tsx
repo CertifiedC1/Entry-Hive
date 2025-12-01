@@ -2,10 +2,14 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Ticket, User, LogOut, ShoppingCart } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
@@ -13,8 +17,45 @@ import { Badge } from '@/components/ui/badge';
 export const Navigation = () => {
   const { user, signOut } = useAuth();
   const location = useLocation();
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserProfile();
+      fetchUserRoles();
+    }
+  }, [user]);
+
+  const fetchUserProfile = async () => {
+    if (!user) return;
+    
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    
+    setUserProfile(data);
+  };
+
+  const fetchUserRoles = async () => {
+    if (!user) return;
+    
+    const { data } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+    
+    if (data) {
+      setUserRoles(data.map(r => r.role));
+    }
+  };
 
   const isActive = (path: string) => location.pathname === path;
+  const isAdmin = userRoles.includes('admin');
+  const isOrganizer = userRoles.includes('organizer');
+  const displayRole = isAdmin ? 'Admin' : isOrganizer ? 'Organizer' : 'User';
 
   return (
     <nav className="border-b bg-card sticky top-0 z-50 backdrop-blur-sm bg-card/95">
@@ -66,32 +107,38 @@ export const Navigation = () => {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" className="gap-2">
                     <User className="h-4 w-4" />
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-medium">{userProfile?.full_name || 'User'}</span>
+                      <span className="text-xs text-muted-foreground">{displayRole}</span>
+                    </div>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link to="/my-tickets" className="w-full cursor-pointer">
                       My Tickets
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/organizer-dashboard" className="w-full cursor-pointer">
-                      Organizer Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/ticket-scanner" className="w-full cursor-pointer">
-                      Scanner
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin-dashboard" className="w-full cursor-pointer">
-                      Admin
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => signOut()}>
+                  {isOrganizer && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/organizer-dashboard" className="w-full cursor-pointer">
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin-dashboard" className="w-full cursor-pointer">
+                        Admin
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => signOut()} className="text-destructive">
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out
                   </DropdownMenuItem>

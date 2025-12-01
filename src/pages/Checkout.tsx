@@ -14,6 +14,11 @@ interface CheckoutState {
   eventId: string;
   selectedTickets: Record<string, number>;
   totalAmount: number;
+  attendeeInfo?: {
+    name: string;
+    email: string;
+    phone: string;
+  };
 }
 
 const Checkout = () => {
@@ -33,6 +38,12 @@ const Checkout = () => {
   useEffect(() => {
     if (!user || !state) {
       navigate('/');
+      return;
+    }
+    
+    // Set customer info from attendee details
+    if (state.attendeeInfo) {
+      setCustomerInfo(state.attendeeInfo);
     }
   }, [user, state, navigate]);
 
