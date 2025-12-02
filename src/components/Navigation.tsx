@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Ticket, User, LogOut, ShoppingCart } from 'lucide-react';
+import { Ticket, User, LogOut, ShoppingCart, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,6 +24,9 @@ export const Navigation = () => {
     if (user) {
       fetchUserProfile();
       fetchUserRoles();
+    } else {
+      setUserProfile(null);
+      setUserRoles([]);
     }
   }, [user]);
 
@@ -66,7 +69,7 @@ export const Navigation = () => {
             <span>Tiko</span>
           </Link>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             <Link to="/">
               <Button 
                 variant="ghost" 
@@ -75,7 +78,7 @@ export const Navigation = () => {
                 Home
               </Button>
             </Link>
-            <Link to="/">
+            <Link to="/events">
               <Button 
                 variant="ghost"
                 className={isActive('/events') ? 'text-primary' : ''}
@@ -84,22 +87,39 @@ export const Navigation = () => {
               </Button>
             </Link>
             <Link to="/about">
-              <Button variant="ghost">About Us</Button>
+              <Button 
+                variant="ghost"
+                className={isActive('/about') ? 'text-primary' : ''}
+              >
+                About Us
+              </Button>
             </Link>
             <Link to="/contact">
-              <Button variant="ghost">Contact Us</Button>
+              <Button 
+                variant="ghost"
+                className={isActive('/contact') ? 'text-primary' : ''}
+              >
+                Contact Us
+              </Button>
             </Link>
+            
+            {/* Dashboard link for organizers only */}
+            {user && isOrganizer && (
+              <Link to="/organizer-dashboard">
+                <Button 
+                  variant="ghost"
+                  className={isActive('/organizer-dashboard') ? 'text-primary' : ''}
+                >
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Button>
+              </Link>
+            )}
             
             {user && (
               <Link to="/my-tickets" className="relative">
                 <Button variant="ghost" size="icon">
                   <ShoppingCart className="h-5 w-5" />
-                  <Badge 
-                    variant="destructive" 
-                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-                  >
-                    0
-                  </Badge>
                 </Button>
               </Link>
             )}
@@ -116,24 +136,38 @@ export const Navigation = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col">
+                      <span>{userProfile?.full_name || 'User'}</span>
+                      <span className="text-xs font-normal text-muted-foreground">{user.email}</span>
+                      <Badge variant="secondary" className="mt-1 w-fit">{displayRole}</Badge>
+                    </div>
+                  </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/my-tickets" className="w-full cursor-pointer">
-                      My Tickets
-                    </Link>
-                  </DropdownMenuItem>
                   {isOrganizer && (
                     <DropdownMenuItem asChild>
                       <Link to="/organizer-dashboard" className="w-full cursor-pointer">
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
                         Dashboard
                       </Link>
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="w-full cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/my-tickets" className="w-full cursor-pointer">
+                      <Ticket className="mr-2 h-4 w-4" />
+                      My Tickets
+                    </Link>
+                  </DropdownMenuItem>
                   {isAdmin && (
                     <DropdownMenuItem asChild>
                       <Link to="/admin-dashboard" className="w-full cursor-pointer">
-                        Admin
+                        Admin Panel
                       </Link>
                     </DropdownMenuItem>
                   )}
