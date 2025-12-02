@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) throw error;
       
-      // If organizer, create organizer profile
+      // If organizer, create organizer role
       if (data.user && role === 'organizer') {
         const { error: roleError } = await supabase
           .from('user_roles')
@@ -68,6 +68,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       
       toast.success('Account created! Please check your email to verify.');
+      
+      // Navigate based on role
       if (role === 'organizer') {
         navigate('/create-organizer');
       } else {
@@ -78,7 +80,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       throw error;
     }
   };
-
   const signIn = async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({

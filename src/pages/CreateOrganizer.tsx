@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
+import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,8 +35,14 @@ const CreateOrganizer = () => {
 
     try {
       const { error } = await supabase.from('organizers').insert(organizerData);
-
       if (error) throw error;
+
+      // Also ensure organizer role is added
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .upsert({ user_id: user.id, role: 'organizer' }, { onConflict: 'user_id,role' });
+      
+      if (roleError) console.error('Role assignment error:', roleError);
 
       toast.success('Organizer profile created successfully!');
       navigate('/organizer-dashboard');
@@ -48,11 +55,19 @@ const CreateOrganizer = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div 
+      className="min-h-screen flex flex-col"
+      style={{
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1920&q=80')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
       <Navigation />
       
-      <div className="container mx-auto max-w-2xl px-4 py-8">
-        <Card>
+      <div className="container mx-auto max-w-2xl px-4 py-8 flex-1">
+        <Card className="backdrop-blur-sm bg-card/95">
           <CardHeader>
             <CardTitle>Create Organizer Profile</CardTitle>
             <CardDescription>
@@ -126,6 +141,8 @@ const CreateOrganizer = () => {
           </CardContent>
         </Card>
       </div>
+      
+      <Footer />
     </div>
   );
 };
