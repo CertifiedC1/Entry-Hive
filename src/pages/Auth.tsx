@@ -15,6 +15,8 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [userType, setUserType] = useState<'customer' | 'organizer'>('customer');
+  const [nameError, setNameError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const { signIn, signUp, user, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -32,6 +34,57 @@ const Auth = () => {
   if (user) {
     return null;
   }
+
+  // Validate name: 2-4 words, only letters and spaces
+  const validateName = (name: string): boolean => {
+    const trimmed = name.trim();
+    const letterOnlyRegex = /^[a-zA-Z\s]+$/;
+    
+    if (!letterOnlyRegex.test(trimmed)) {
+      setNameError('Invalid name format. Only letters are allowed.');
+      return false;
+    }
+    
+    const words = trimmed.split(/\s+/).filter(w => w.length > 0);
+    if (words.length < 2 || words.length > 4) {
+      setNameError('Name must contain 2 to 4 names.');
+      return false;
+    }
+    
+    setNameError('');
+    return true;
+  };
+
+  // Validate phone: only numbers, max 13 characters
+  const validatePhone = (phone: string): boolean => {
+    const trimmed = phone.trim();
+    const numberOnlyRegex = /^[0-9+]+$/;
+    
+    if (!numberOnlyRegex.test(trimmed)) {
+      setPhoneError('Invalid number format. Only numbers are allowed.');
+      return false;
+    }
+    
+    if (trimmed.length > 13) {
+      setPhoneError('Invalid number format. Maximum 13 characters.');
+      return false;
+    }
+    
+    setPhoneError('');
+    return true;
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value) validateName(value);
+    else setNameError('');
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value) validatePhone(value);
+    else setPhoneError('');
+  };
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -61,6 +114,16 @@ const Auth = () => {
     const fullName = formData.get('fullName') as string;
     const phoneNumber = formData.get('phoneNumber') as string;
 
+    if (!validateName(fullName)) {
+      setIsLoading(false);
+      return;
+    }
+
+    if (!validatePhone(phoneNumber)) {
+      setIsLoading(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
       setIsLoading(false);
@@ -80,14 +143,18 @@ const Auth = () => {
     <div 
       className="flex min-h-screen items-center justify-center px-4 py-12"
       style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1920&q=80')`,
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url('/images/auth-bg.png')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',
       }}
     >
-      <Card className="w-full max-w-md backdrop-blur-sm bg-card/95">
+      <Card className="w-full max-w-md backdrop-blur-sm bg-card/95 animate-fade-in">
         <CardHeader className="text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Ticket className="h-8 w-8 text-primary" />
+            <span className="text-2xl font-bold text-primary">Tiko</span>
+          </div>
           <CardTitle className="text-2xl">Welcome</CardTitle>
           <CardDescription>Sign in to your account or create a new one</CardDescription>
         </CardHeader>
@@ -98,7 +165,7 @@ const Auth = () => {
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="signin">
+            <TabsContent value="signin" className="animate-fade-in">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">Email</Label>
@@ -108,25 +175,38 @@ const Auth = () => {
                     type="email"
                     placeholder="you@example.com"
                     required
+                    className="transition-all duration-200 focus:ring-2 focus:ring-primary/50"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">Password</Label>
-                  <Input
-                    id="signin-password"
-                    name="password"
-                    type="password"
-                    placeholder="••••••••"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="signin-password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      required
+                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/50"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full transition-all duration-200" disabled={isLoading}>
                   {isLoading ? 'Signing in...' : 'Sign In'}
                 </Button>
               </form>
             </TabsContent>
             
-            <TabsContent value="signup">
+            <TabsContent value="signup" className="animate-fade-in">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">Full Name</Label>
@@ -134,9 +214,14 @@ const Auth = () => {
                     id="signup-name"
                     name="fullName"
                     type="text"
-                    placeholder="Enter your full name"
+                    placeholder="Enter your full name (2-4 names)"
                     required
+                    onChange={handleNameChange}
+                    className={`transition-all duration-200 focus:ring-2 focus:ring-primary/50 ${nameError ? 'border-destructive' : ''}`}
                   />
+                  {nameError && (
+                    <p className="text-sm text-destructive animate-fade-in">{nameError}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
@@ -146,6 +231,7 @@ const Auth = () => {
                     type="email"
                     placeholder="Enter your email"
                     required
+                    className="transition-all duration-200 focus:ring-2 focus:ring-primary/50"
                   />
                 </div>
                 <div className="space-y-2">
@@ -156,12 +242,18 @@ const Auth = () => {
                     type="tel"
                     placeholder="Enter your phone number"
                     required
+                    maxLength={13}
+                    onChange={handlePhoneChange}
+                    className={`transition-all duration-200 focus:ring-2 focus:ring-primary/50 ${phoneError ? 'border-destructive' : ''}`}
                   />
+                  {phoneError && (
+                    <p className="text-sm text-destructive animate-fade-in">{phoneError}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="user-type">I want to become</Label>
                   <Select value={userType} onValueChange={(value: 'customer' | 'organizer') => setUserType(value)}>
-                    <SelectTrigger id="user-type">
+                    <SelectTrigger id="user-type" className="transition-all duration-200 focus:ring-2 focus:ring-primary/50">
                       <SelectValue placeholder="Select user type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -180,6 +272,7 @@ const Auth = () => {
                       placeholder="Create a password"
                       required
                       minLength={6}
+                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/50"
                     />
                     <Button
                       type="button"
@@ -202,6 +295,7 @@ const Auth = () => {
                       placeholder="Confirm your password"
                       required
                       minLength={6}
+                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/50"
                     />
                     <Button
                       type="button"
@@ -214,7 +308,11 @@ const Auth = () => {
                     </Button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full transition-all duration-200" 
+                  disabled={isLoading || !!nameError || !!phoneError}
+                >
                   {isLoading ? 'Creating account...' : 'Create Account'}
                 </Button>
               </form>
