@@ -3,11 +3,13 @@ import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScanLine, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScanLine, CheckCircle, XCircle, AlertTriangle, Camera, Keyboard } from 'lucide-react';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { QRScanner } from '@/components/QRScanner';
 
 interface ScanResult {
   success: boolean;
@@ -34,8 +36,10 @@ const TicketScanner = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const handleScan = async () => {
-    if (!qrCode.trim()) {
+  const handleScan = async (code?: string) => {
+    const codeToScan = code || qrCode;
+    
+    if (!codeToScan.trim()) {
       toast({
         title: 'Error',
         description: 'Please enter a QR code',
@@ -66,7 +70,7 @@ const TicketScanner = () => {
             name
           )
         `)
-        .eq('qr_code', qrCode.trim())
+        .eq('qr_code', codeToScan.trim())
         .single();
 
       if (error || !ticket) {
@@ -151,17 +155,30 @@ const TicketScanner = () => {
     }
   };
 
+  const handleCameraScan = (result: string) => {
+    setQrCode(result);
+    handleScan(result);
+  };
+
   const resetScanner = () => {
     setQrCode('');
     setScanResult(null);
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div 
+      className="min-h-screen"
+      style={{
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1920&q=80')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
       <Navigation />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <Card>
+          <Card className="backdrop-blur-sm bg-card/95">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-2xl">
                 <ScanLine className="h-6 w-6" />
@@ -169,31 +186,57 @@ const TicketScanner = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  Enter or Scan QR Code
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    type="text"
-                    value={qrCode}
-                    onChange={(e) => setQrCode(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Scan or paste QR code here..."
-                    className="flex-1"
-                    disabled={scanning}
+              <Tabs defaultValue="camera" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="camera" className="flex items-center gap-2">
+                    <Camera className="h-4 w-4" />
+                    Camera
+                  </TabsTrigger>
+                  <TabsTrigger value="manual" className="flex items-center gap-2">
+                    <Keyboard className="h-4 w-4" />
+                    Manual
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="camera" className="space-y-4 mt-4">
+                  <QRScanner 
+                    onScan={handleCameraScan}
+                    onError={(error) => toast({
+                      title: 'Camera Error',
+                      description: error,
+                      variant: 'destructive'
+                    })}
                   />
-                  <Button 
-                    onClick={handleScan}
-                    disabled={scanning || !qrCode.trim()}
-                  >
-                    {scanning ? 'Validating...' : 'Validate'}
-                  </Button>
-                </div>
-              </div>
+                </TabsContent>
+
+                <TabsContent value="manual" className="space-y-4 mt-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      Enter QR Code Manually
+                    </label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="text"
+                        value={qrCode}
+                        onChange={(e) => setQrCode(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Paste QR code here..."
+                        className="flex-1"
+                        disabled={scanning}
+                      />
+                      <Button 
+                        onClick={() => handleScan()}
+                        disabled={scanning || !qrCode.trim()}
+                      >
+                        {scanning ? 'Validating...' : 'Validate'}
+                      </Button>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
 
               {scanResult && (
-                <div className={`p-6 rounded-lg border-2 ${
+                <div className={`p-6 rounded-lg border-2 animate-fade-in ${
                   scanResult.success 
                     ? 'border-green-500 bg-green-500/10' 
                     : 'border-red-500 bg-red-500/10'
@@ -245,10 +288,10 @@ const TicketScanner = () => {
                   <div className="text-sm">
                     <p className="font-semibold mb-1">Scanner Instructions:</p>
                     <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                      <li>Scan or manually enter the QR code from the ticket</li>
+                      <li>Use camera to scan QR codes directly</li>
+                      <li>Or manually enter the QR code text</li>
                       <li>Each ticket can only be validated once</li>
-                      <li>Used tickets will be marked and cannot be reused</li>
-                      <li>All scans are logged for security purposes</li>
+                      <li>All scans are logged for security</li>
                     </ul>
                   </div>
                 </div>

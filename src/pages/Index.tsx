@@ -3,8 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { EventCard } from '@/components/EventCard';
+import { HeroSlideshow } from '@/components/HeroSlideshow';
+import { ImageSlider } from '@/components/ImageSlider';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Search, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -107,36 +108,24 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
-      {/* Hero Section with Unsplash Background */}
-      <section 
-        className="relative overflow-hidden py-32 bg-cover bg-center"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1600&q=80')`
-        }}
-      >
-        <div className="container relative mx-auto px-4">
-          <div className="mx-auto max-w-4xl text-center">
-            <h1 className="mb-6 text-5xl font-bold tracking-tight text-white sm:text-6xl md:text-7xl">
-              Welcome
-            </h1>
-            <p className="mb-12 text-xl text-white/90">
-              Discover and book tickets to amazing events
-            </p>
-            
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="mx-auto max-w-3xl">
-              <div className="relative">
-                <Search className="absolute left-6 top-1/2 h-6 w-6 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search an event..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-16 rounded-full bg-white pl-16 text-lg shadow-xl"
-                />
-              </div>
-            </form>
-          </div>
+      {/* Hero Slideshow */}
+      <section className="relative">
+        <HeroSlideshow />
+        
+        {/* Search Bar Overlay */}
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-full max-w-3xl px-4">
+          <form onSubmit={handleSearch}>
+            <div className="relative">
+              <Search className="absolute left-6 top-1/2 h-6 w-6 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search an event..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-14 md:h-16 rounded-full bg-white pl-16 text-lg shadow-xl text-foreground"
+              />
+            </div>
+          </form>
         </div>
       </section>
 
@@ -147,7 +136,7 @@ const Index = () => {
           <div className="flex flex-wrap gap-2">
             <Badge
               variant={selectedCategory === null ? 'default' : 'outline'}
-              className="cursor-pointer"
+              className="cursor-pointer transition-all duration-200 hover:scale-105"
               onClick={() => setSelectedCategory(null)}
             >
               All
@@ -156,10 +145,10 @@ const Index = () => {
               <Badge
                 key={category.id}
                 variant={selectedCategory === category.id ? 'default' : 'outline'}
-                className="cursor-pointer"
+                className="cursor-pointer transition-all duration-200 hover:scale-105"
                 onClick={() => setSelectedCategory(category.id)}
               >
-                {category.name}
+                {category.icon} {category.name}
               </Badge>
             ))}
           </div>
@@ -203,6 +192,9 @@ const Index = () => {
           )}
         </div>
       </section>
+      
+      {/* Image Slider */}
+      <ImageSlider />
       
       <Footer />
     </div>

@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Trash2, Upload, Image } from 'lucide-react';
 
 interface TicketType {
   name: string;
@@ -26,6 +26,8 @@ const CreateEvent = () => {
   const [loading, setLoading] = useState(false);
   const [organizerId, setOrganizerId] = useState<string | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [bannerUrl, setBannerUrl] = useState<string>('');
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
     { name: 'General', description: '', price: 0, quantity_available: 100 },
   ]);
@@ -60,6 +62,16 @@ const CreateEvent = () => {
   const fetchCategories = async () => {
     const { data } = await supabase.from('categories').select('*');
     setCategories(data || []);
+  };
+
+  const handleBannerUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setBannerUrl(url);
+    if (url) {
+      setBannerPreview(url);
+    } else {
+      setBannerPreview(null);
+    }
   };
 
   const addTicketType = () => {
@@ -104,6 +116,7 @@ const CreateEvent = () => {
           end_date: formData.get('end_date') as string,
           category_id: formData.get('category_id') as string,
           total_capacity: parseInt(formData.get('total_capacity') as string),
+          banner_url: bannerUrl || null,
           published: false,
         })
         .select()
@@ -162,11 +175,68 @@ const CreateEvent = () => {
       <div className="container mx-auto max-w-4xl px-4 py-8">
         <Card className="backdrop-blur-sm bg-card/95">
           <CardHeader>
-            <CardTitle className="text-3xl">Create New Event</CardTitle>
+            <CardTitle className="text-2xl md:text-3xl">Create New Event</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
+              {/* Event Banner */}
+              <div className="space-y-2">
+                <Label htmlFor="banner_url">Event Banner Image</Label>
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-2">
+                    <Image className="h-5 w-5 text-muted-foreground" />
+                    <Input
+                      id="banner_url"
+                      name="banner_url"
+                      type="url"
+                      value={bannerUrl}
+                      onChange={handleBannerUrlChange}
+                      placeholder="Enter image URL (e.g., https://images.unsplash.com/...)"
+                      className="flex-1"
+                    />
+                  </div>
+                  
+                  {bannerPreview ? (
+                    <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted">
+                      <img
+                        src={bannerPreview}
+                        alt="Event banner preview"
+                        className="h-full w-full object-cover"
+                        onError={() => {
+                          setBannerPreview(null);
+                          toast.error('Failed to load image. Please check the URL.');
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={() => {
+                          setBannerUrl('');
+                          setBannerPreview(null);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="aspect-video w-full rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center bg-muted/50">
+                      <div className="text-center">
+                        <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">
+                          Enter an image URL above to preview
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Recommended: 1920x1080 or similar aspect ratio
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="title">Event Title *</Label>
                   <Input
@@ -347,7 +417,7 @@ const CreateEvent = () => {
                 ))}
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Button
                   type="button"
                   variant="outline"
