@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
+import { ImageSlider } from '@/components/ImageSlider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -50,7 +51,7 @@ const AttendeeDetails = () => {
 
   return (
     <div 
-      className="min-h-screen"
+      className="min-h-screen flex flex-col"
       style={{
         backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1920&q=80')`,
         backgroundSize: 'cover',
@@ -60,27 +61,27 @@ const AttendeeDetails = () => {
     >
       <Navigation />
       
-      <div className="container mx-auto max-w-2xl px-4 py-12">
+      <div className="container mx-auto max-w-2xl px-4 py-8 md:py-12 flex-1">
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
-          className="mb-6 text-white hover:text-white/80"
+          className="mb-4 md:mb-6 text-white hover:text-white/80"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
 
         <Card className="backdrop-blur-sm bg-card/95">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Attendees</CardTitle>
-            <CardDescription>
+          <CardHeader className="text-center p-4 md:p-6">
+            <CardTitle className="text-xl md:text-2xl">Attendees</CardTitle>
+            <CardDescription className="text-xs md:text-sm">
               Your tickets will automatically be sent to you and your guests. You will simply need to fill in their Name, Email address and phone number.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <CardContent className="p-4 md:p-6 pt-0">
+            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg">Ticket #1 - Advance</h3>
+                <h3 className="font-semibold text-base md:text-lg">Ticket #1 - Advance</h3>
                 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -129,7 +130,7 @@ const AttendeeDetails = () => {
                 />
                 <label
                   htmlFor="terms"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  className="text-xs md:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
                   By ticking this box, I agree that I have read, understood and agreed to the{' '}
                   <Link to="/terms" className="text-primary hover:underline">
@@ -142,7 +143,7 @@ const AttendeeDetails = () => {
                 </label>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
                 <Button
                   type="button"
                   variant="outline"
@@ -163,6 +164,7 @@ const AttendeeDetails = () => {
           </CardContent>
         </Card>
       </div>
+      <ImageSlider />
       <Footer />
     </div>
   );

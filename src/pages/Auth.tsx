@@ -35,7 +35,7 @@ const Auth = () => {
     return null;
   }
 
-  // Validate name: 2-4 words, only letters and spaces
+  // Validate name: 2-4 words, only letters and spaces, each word at least 2 characters
   const validateName = (name: string): boolean => {
     const trimmed = name.trim();
     const letterOnlyRegex = /^[a-zA-Z\s]+$/;
@@ -48,6 +48,13 @@ const Auth = () => {
     const words = trimmed.split(/\s+/).filter(w => w.length > 0);
     if (words.length < 2 || words.length > 4) {
       setNameError('Name must contain 2 to 4 names.');
+      return false;
+    }
+
+    // Each word must be at least 2 characters
+    const hasShortWord = words.some(w => w.length < 2);
+    if (hasShortWord) {
+      setNameError('Each name must be at least 2 characters.');
       return false;
     }
     

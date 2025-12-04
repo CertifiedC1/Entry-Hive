@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
+import { ImageSlider } from '@/components/ImageSlider';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -88,23 +89,23 @@ const Events = () => {
       <Navigation />
       
       {/* Search Section */}
-      <section className="border-b bg-card py-6">
+      <section className="border-b bg-card py-4 md:py-6">
         <div className="container mx-auto px-4">
           <div className="relative max-w-2xl">
-            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-4 top-1/2 h-4 w-4 md:h-5 md:w-5 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search an event..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-12 pl-12 text-base"
+              className="h-10 md:h-12 pl-10 md:pl-12 text-sm md:text-base"
             />
           </div>
 
-          <div className="mt-4 flex items-center gap-2">
-            <span className="text-sm font-medium">Choose a Location :</span>
+          <div className="mt-3 md:mt-4 flex flex-col sm:flex-row sm:items-center gap-2">
+            <span className="text-xs md:text-sm font-medium">Choose a Location :</span>
             <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="All Cities" />
               </SelectTrigger>
               <SelectContent>
@@ -120,7 +121,7 @@ const Events = () => {
       </section>
 
       {/* Events List */}
-      <section className="py-8 flex-1">
+      <section className="py-6 md:py-8 flex-1">
         <div className="container mx-auto px-4">
           {loading ? (
             <div className="flex items-center justify-center py-12">
@@ -133,7 +134,7 @@ const Events = () => {
               </p>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               {events.map((event) => {
                 const minPrice = getMinPrice(event.ticket_types);
                 const isClosed = isRegistrationClosed(event.ticket_types);
@@ -144,35 +145,47 @@ const Events = () => {
                     to={`/events/${event.id}`}
                     className="block"
                   >
-                    <div className="flex flex-col md:flex-row gap-6 p-4 border-b hover:bg-muted/30 transition-colors">
+                    <div className="flex flex-col md:flex-row gap-4 md:gap-6 p-4 border-b hover:bg-muted/30 transition-colors">
+                      {/* Event Image - Mobile First */}
+                      <div className="relative w-full md:w-72 h-48 md:h-40 flex-shrink-0 order-first md:order-last">
+                        <img
+                          src={event.banner_url || `https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&q=80`}
+                          alt={event.title}
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                        <button className="absolute top-3 right-3 p-2 bg-white/90 rounded-full hover:bg-white transition-colors">
+                          <Heart className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground hover:text-red-500" />
+                        </button>
+                      </div>
+
                       {/* Event Details */}
                       <div className="flex-1 space-y-2">
-                        <h3 className="text-xl font-bold text-foreground hover:text-primary transition-colors">
+                        <h3 className="text-lg md:text-xl font-bold text-foreground hover:text-primary transition-colors line-clamp-2">
                           {event.title}
                         </h3>
                         
-                        <div className="flex items-center gap-2 text-primary text-sm">
-                          <Calendar className="h-4 w-4" />
-                          <span>
+                        <div className="flex items-center gap-2 text-primary text-xs md:text-sm">
+                          <Calendar className="h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
+                          <span className="line-clamp-1">
                             {format(new Date(event.event_date), "EEE dd MMM yy h:mm a")}
                             {event.end_date && (
-                              <> To {format(new Date(event.end_date), "EEE dd MMM yy h:mm a")}</>
+                              <span className="hidden sm:inline"> To {format(new Date(event.end_date), "EEE dd MMM yy h:mm a")}</span>
                             )}
                           </span>
                         </div>
 
                         <div className="space-y-1">
                           {minPrice === 0 ? (
-                            <Badge variant="secondary" className="bg-green-100 text-green-700">
+                            <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
                               FREE
                             </Badge>
                           ) : minPrice ? (
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-xs md:text-sm text-muted-foreground">
                               Starts at <span className="font-semibold text-foreground">{minPrice.toLocaleString()} Ksh</span>
                             </p>
                           ) : null}
 
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-xs md:text-sm text-muted-foreground line-clamp-1">
                             {event.venue}
                           </p>
 
@@ -187,18 +200,6 @@ const Events = () => {
                           )}
                         </div>
                       </div>
-
-                      {/* Event Image */}
-                      <div className="relative w-full md:w-72 h-48 md:h-40 flex-shrink-0">
-                        <img
-                          src={event.banner_url || `https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&q=80`}
-                          alt={event.title}
-                          className="w-full h-full object-cover rounded-lg"
-                        />
-                        <button className="absolute top-3 right-3 p-2 bg-white/90 rounded-full hover:bg-white transition-colors">
-                          <Heart className="h-5 w-5 text-muted-foreground hover:text-red-500" />
-                        </button>
-                      </div>
                     </div>
                   </Link>
                 );
@@ -208,6 +209,7 @@ const Events = () => {
         </div>
       </section>
       
+      <ImageSlider />
       <Footer />
     </div>
   );

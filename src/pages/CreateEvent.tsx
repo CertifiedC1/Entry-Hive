@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
+import { ImageSlider } from '@/components/ImageSlider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2, Upload, Image } from 'lucide-react';
+import { Loader2, Plus, Trash2, Upload, Image, X } from 'lucide-react';
 
 interface TicketType {
   name: string;
@@ -23,11 +24,13 @@ interface TicketType {
 const CreateEvent = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [organizerId, setOrganizerId] = useState<string | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
-  const [bannerUrl, setBannerUrl] = useState<string>('');
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
     { name: 'General', description: '', price: 0, quantity_available: 100 },
   ]);
@@ -64,13 +67,64 @@ const CreateEvent = () => {
     setCategories(data || []);
   };
 
-  const handleBannerUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value;
-    setBannerUrl(url);
-    if (url) {
-      setBannerPreview(url);
-    } else {
-      setBannerPreview(null);
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    setBannerFile(file);
+    const preview = URL.createObjectURL(file);
+    setBannerPreview(preview);
+  };
+
+  const removeBanner = () => {
+    setBannerFile(null);
+    if (bannerPreview) {
+      URL.revokeObjectURL(bannerPreview);
+    }
+    setBannerPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const uploadBanner = async (): Promise<string | null> => {
+    if (!bannerFile || !user) return null;
+
+    setUploading(true);
+    try {
+      const fileExt = bannerFile.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `event-banners/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('events')
+        .upload(filePath, bannerFile);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('events')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error: any) {
+      console.error('Error uploading banner:', error);
+      toast.error('Failed to upload banner image');
+      return null;
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -102,6 +156,12 @@ const CreateEvent = () => {
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
     try {
+      // Upload banner if exists
+      let bannerUrl: string | null = null;
+      if (bannerFile) {
+        bannerUrl = await uploadBanner();
+      }
+
       // Create event
       const { data: event, error: eventError } = await supabase
         .from('events')
@@ -116,7 +176,7 @@ const CreateEvent = () => {
           end_date: formData.get('end_date') as string,
           category_id: formData.get('category_id') as string,
           total_capacity: parseInt(formData.get('total_capacity') as string),
-          banner_url: bannerUrl || null,
+          banner_url: bannerUrl,
           published: false,
         })
         .select()
@@ -162,7 +222,7 @@ const CreateEvent = () => {
 
   return (
     <div 
-      className="min-h-screen"
+      className="min-h-screen flex flex-col"
       style={{
         backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1920&q=80')`,
         backgroundSize: 'cover',
@@ -172,29 +232,24 @@ const CreateEvent = () => {
     >
       <Navigation />
       
-      <div className="container mx-auto max-w-4xl px-4 py-8">
+      <div className="container mx-auto max-w-4xl px-4 py-6 md:py-8 flex-1">
         <Card className="backdrop-blur-sm bg-card/95">
           <CardHeader>
-            <CardTitle className="text-2xl md:text-3xl">Create New Event</CardTitle>
+            <CardTitle className="text-xl md:text-2xl lg:text-3xl">Create New Event</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Event Banner */}
+              {/* Event Banner Upload */}
               <div className="space-y-2">
-                <Label htmlFor="banner_url">Event Banner Image</Label>
+                <Label>Event Banner Image</Label>
                 <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-2">
-                    <Image className="h-5 w-5 text-muted-foreground" />
-                    <Input
-                      id="banner_url"
-                      name="banner_url"
-                      type="url"
-                      value={bannerUrl}
-                      onChange={handleBannerUrlChange}
-                      placeholder="Enter image URL (e.g., https://images.unsplash.com/...)"
-                      className="flex-1"
-                    />
-                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
                   
                   {bannerPreview ? (
                     <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted">
@@ -202,36 +257,44 @@ const CreateEvent = () => {
                         src={bannerPreview}
                         alt="Event banner preview"
                         className="h-full w-full object-cover"
-                        onError={() => {
-                          setBannerPreview(null);
-                          toast.error('Failed to load image. Please check the URL.');
-                        }}
                       />
                       <Button
                         type="button"
                         variant="destructive"
                         size="sm"
                         className="absolute top-2 right-2"
-                        onClick={() => {
-                          setBannerUrl('');
-                          setBannerPreview(null);
-                        }}
+                        onClick={removeBanner}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <X className="h-4 w-4" />
                       </Button>
                     </div>
                   ) : (
-                    <div className="aspect-video w-full rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center bg-muted/50">
-                      <div className="text-center">
-                        <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                        <p className="text-sm text-muted-foreground">
-                          Enter an image URL above to preview
+                    <div 
+                      className="aspect-video w-full rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center bg-muted/50 cursor-pointer hover:bg-muted/70 transition-colors"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <div className="text-center p-4">
+                        <Upload className="h-8 w-8 md:h-10 md:w-10 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground font-medium">
+                          Click to upload banner image
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Recommended: 1920x1080 or similar aspect ratio
+                          PNG, JPG up to 5MB
                         </p>
                       </div>
                     </div>
+                  )}
+
+                  {!bannerPreview && (
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full md:w-auto"
+                    >
+                      <Image className="mr-2 h-4 w-4" />
+                      Browse Files
+                    </Button>
                   )}
                 </div>
               </div>
@@ -325,8 +388,8 @@ const CreateEvent = () => {
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label className="text-lg font-semibold">Ticket Types</Label>
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <Label className="text-base md:text-lg font-semibold">Ticket Types</Label>
                   <Button
                     type="button"
                     variant="outline"
@@ -426,11 +489,11 @@ const CreateEvent = () => {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" className="flex-1" disabled={loading}>
-                  {loading ? (
+                <Button type="submit" className="flex-1" disabled={loading || uploading}>
+                  {loading || uploading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
+                      {uploading ? 'Uploading...' : 'Creating...'}
                     </>
                   ) : (
                     'Create Event'
@@ -441,6 +504,7 @@ const CreateEvent = () => {
           </CardContent>
         </Card>
       </div>
+      <ImageSlider />
       <Footer />
     </div>
   );
