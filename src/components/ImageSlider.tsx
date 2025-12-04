@@ -37,7 +37,7 @@ export const ImageSlider = () => {
 
     let animationId: number;
     let scrollPosition = 0;
-    const scrollSpeed = 0.5;
+    const scrollSpeed = 0.3; // Slower for smoother effect
 
     const animate = () => {
       scrollPosition += scrollSpeed;
@@ -62,17 +62,17 @@ export const ImageSlider = () => {
   const allImages = [...ticketingImages, ...ticketingImages];
 
   return (
-    <div className="w-full overflow-hidden bg-muted/30 py-8">
+    <div className="w-full overflow-hidden bg-muted/30 py-6 md:py-8">
       <div 
         ref={scrollRef}
-        className="flex gap-4 overflow-x-hidden"
+        className="flex gap-3 md:gap-4 overflow-x-hidden"
         style={{ scrollBehavior: 'auto' }}
       >
         {allImages.map((image, index) => (
           <div
             key={index}
-            className="flex-shrink-0 relative rounded-xl overflow-hidden group"
-            style={{ width: '280px', height: '380px' }}
+            className="flex-shrink-0 relative rounded-lg md:rounded-xl overflow-hidden group"
+            style={{ width: '200px', height: '280px' }}
           >
             <img
               src={image.url}
@@ -80,9 +80,9 @@ export const ImageSlider = () => {
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-              <h3 className="text-xl font-bold">{image.title}</h3>
-              <p className="text-sm text-white/80">{image.subtitle}</p>
+            <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4 text-white">
+              <h3 className="text-base md:text-xl font-bold">{image.title}</h3>
+              <p className="text-xs md:text-sm text-white/80">{image.subtitle}</p>
             </div>
           </div>
         ))}

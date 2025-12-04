@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
+import { ImageSlider } from '@/components/ImageSlider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -159,15 +160,15 @@ const EventDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid gap-8 lg:grid-cols-3">
+      <div className="container mx-auto px-4 py-6 md:py-8 flex-1">
+        <div className="grid gap-6 md:gap-8 lg:grid-cols-3">
           {/* Main Content */}
           <div className="lg:col-span-2">
             {/* Banner */}
-            <div className="mb-6 aspect-video overflow-hidden rounded-lg bg-muted">
+            <div className="mb-4 md:mb-6 aspect-video overflow-hidden rounded-lg bg-muted">
               {event.banner_url ? (
                 <img
                   src={event.banner_url}
@@ -180,13 +181,13 @@ const EventDetails = () => {
                     backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&q=80')`
                   }}
                 >
-                  <Ticket className="h-24 w-24 text-white" />
+                  <Ticket className="h-16 w-16 md:h-24 md:w-24 text-white" />
                 </div>
               )}
             </div>
 
             {/* Title and Category */}
-            <div className="mb-6">
+            <div className="mb-4 md:mb-6">
               <div className="mb-2 flex items-center gap-2">
                 {event.categories && (
                   <Badge variant="secondary">
@@ -194,17 +195,17 @@ const EventDetails = () => {
                   </Badge>
                 )}
               </div>
-              <h1 className="mb-4 text-3xl font-bold md:text-4xl">{event.title}</h1>
+              <h1 className="mb-4 text-2xl md:text-3xl lg:text-4xl font-bold">{event.title}</h1>
               
               {/* Event Info */}
               <div className="space-y-3">
                 <div className="flex items-center gap-3 text-muted-foreground">
-                  <Calendar className="h-5 w-5" />
+                  <Calendar className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-foreground">
+                    <p className="font-medium text-foreground text-sm md:text-base">
                       {format(new Date(event.event_date), 'EEEE, MMMM d, yyyy')}
                     </p>
-                    <p className="text-sm">
+                    <p className="text-xs md:text-sm">
                       {format(new Date(event.event_date), 'h:mm a')}
                       {event.end_date && ` - ${format(new Date(event.end_date), 'h:mm a')}`}
                     </p>
@@ -212,62 +213,62 @@ const EventDetails = () => {
                 </div>
                 
                 <div className="flex items-center gap-3 text-muted-foreground">
-                  <MapPin className="h-5 w-5" />
+                  <MapPin className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-foreground">{event.venue}</p>
-                    <p className="text-sm">{event.location}</p>
+                    <p className="font-medium text-foreground text-sm md:text-base">{event.venue}</p>
+                    <p className="text-xs md:text-sm">{event.location}</p>
                   </div>
                 </div>
 
                 {event.total_capacity && (
                   <div className="flex items-center gap-3 text-muted-foreground">
-                    <Users className="h-5 w-5" />
-                    <p>Capacity: {event.total_capacity.toLocaleString()}</p>
+                    <Users className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
+                    <p className="text-sm md:text-base">Capacity: {event.total_capacity.toLocaleString()}</p>
                   </div>
                 )}
               </div>
             </div>
 
-            <Separator className="my-6" />
+            <Separator className="my-4 md:my-6" />
 
             {/* Description */}
-            <div className="mb-6">
-              <h2 className="mb-3 text-2xl font-bold">About This Event</h2>
-              <p className="whitespace-pre-wrap text-muted-foreground">{event.description}</p>
+            <div className="mb-4 md:mb-6">
+              <h2 className="mb-3 text-xl md:text-2xl font-bold">About This Event</h2>
+              <p className="whitespace-pre-wrap text-muted-foreground text-sm md:text-base">{event.description}</p>
             </div>
 
-            <Separator className="my-6" />
+            <Separator className="my-4 md:my-6" />
 
             {/* Organizer */}
             <div>
-              <h2 className="mb-3 text-2xl font-bold">Organized By</h2>
+              <h2 className="mb-3 text-xl md:text-2xl font-bold">Organized By</h2>
               <div className="flex items-center gap-3">
                 {event.organizers.logo_url ? (
                   <img
                     src={event.organizers.logo_url}
                     alt={event.organizers.organization_name}
-                    className="h-12 w-12 rounded-full object-cover"
+                    className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
                     {event.organizers.organization_name.charAt(0)}
                   </div>
                 )}
-                <p className="font-semibold">{event.organizers.organization_name}</p>
+                <p className="font-semibold text-sm md:text-base">{event.organizers.organization_name}</p>
               </div>
             </div>
           </div>
 
           {/* Ticket Selection Sidebar */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-4">
-              <CardHeader>
-                <CardTitle>Select Tickets</CardTitle>
-                <CardDescription>Choose your tickets and quantity</CardDescription>
+            <Card className="sticky top-20">
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="text-lg md:text-xl">Select Tickets</CardTitle>
+                <CardDescription className="text-xs md:text-sm">Choose your tickets and quantity</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 md:space-y-6 p-4 md:p-6 pt-0">
                 {ticketTypes.length === 0 ? (
-                  <p className="text-center text-muted-foreground">
+                  <p className="text-center text-muted-foreground text-sm">
                     No tickets available yet
                   </p>
                 ) : (
@@ -280,13 +281,13 @@ const EventDetails = () => {
                         <div key={ticketType.id} className="space-y-2">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <p className="font-semibold">{ticketType.name}</p>
+                              <p className="font-semibold text-sm md:text-base">{ticketType.name}</p>
                               {ticketType.description && (
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-xs md:text-sm text-muted-foreground">
                                   {ticketType.description}
                                 </p>
                               )}
-                              <p className="mt-1 text-lg font-bold text-primary">
+                              <p className="mt-1 text-base md:text-lg font-bold text-primary">
                                 KES {ticketType.price.toLocaleString()}
                               </p>
                               <p className="text-xs text-muted-foreground">
@@ -310,7 +311,7 @@ const EventDetails = () => {
                               >
                                 -
                               </Button>
-                              <span className="w-12 text-center">
+                              <span className="w-10 md:w-12 text-center text-sm md:text-base">
                                 {selectedTickets[ticketType.id] || 0}
                               </span>
                               <Button
@@ -339,13 +340,13 @@ const EventDetails = () => {
                     <Separator />
 
                     <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
+                      <div className="flex justify-between text-xs md:text-sm">
                         <span>Total Tickets:</span>
                         <span className="font-semibold">{getTotalTickets()}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-lg font-semibold">Total:</span>
-                        <span className="text-lg font-bold text-primary">
+                        <span className="text-base md:text-lg font-semibold">Total:</span>
+                        <span className="text-base md:text-lg font-bold text-primary">
                           KES {getTotalAmount().toLocaleString()}
                         </span>
                       </div>
@@ -367,6 +368,7 @@ const EventDetails = () => {
           </div>
         </div>
       </div>
+      <ImageSlider />
       <Footer />
     </div>
   );

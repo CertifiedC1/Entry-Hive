@@ -1,5 +1,6 @@
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
+import { ImageSlider } from '@/components/ImageSlider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Ticket, Calendar, MapPin, Download, QrCode } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -249,6 +250,7 @@ const MyTickets = () => {
           </div>
         )}
       </div>
+      <ImageSlider />
       <Footer />
     </div>
   );
