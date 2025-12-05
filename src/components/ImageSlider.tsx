@@ -78,11 +78,12 @@ export const ImageSlider = () => {
               src={image.url}
               alt={image.title}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              style={{ filter: 'none' }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4 text-white">
-              <h3 className="text-base md:text-xl font-bold">{image.title}</h3>
-              <p className="text-xs md:text-sm text-white/80">{image.subtitle}</p>
+              <h3 className="text-base md:text-xl font-bold drop-shadow-lg">{image.title}</h3>
+              <p className="text-xs md:text-sm text-white/90 drop-shadow-md">{image.subtitle}</p>
             </div>
           </div>
         ))}

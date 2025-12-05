@@ -23,6 +23,8 @@ import ContactUs from "./pages/ContactUs";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
+import OrganizerPaymentSetup from "./pages/OrganizerPaymentSetup";
+import OrganizerPayouts from "./pages/OrganizerPayouts";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +50,8 @@ const App = () => (
               <Route path="/create-organizer" element={<CreateOrganizer />} />
               <Route path="/ticket-scanner" element={<TicketScanner />} />
               <Route path="/admin-dashboard" element={<AdminDashboard />} />
+              <Route path="/organizer/payment-setup" element={<OrganizerPaymentSetup />} />
+              <Route path="/organizer/payouts" element={<OrganizerPayouts />} />
               <Route path="/about" element={<AboutUs />} />
               <Route path="/contact" element={<ContactUs />} />
               <Route path="/terms" element={<TermsAndConditions />} />

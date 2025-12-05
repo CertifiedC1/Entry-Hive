@@ -19,7 +19,10 @@ import {
   XCircle,
   Eye,
   Ban,
-  UserCheck
+  UserCheck,
+  Percent,
+  Wallet,
+  Building
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,11 +35,14 @@ interface DashboardStats {
   totalEvents: number;
   totalTickets: number;
   totalRevenue: number;
+  totalCommission: number;
   recentPayments: any[];
   recentScans: any[];
   allUsers: any[];
   allEvents: any[];
   allOrders: any[];
+  payouts: any[];
+  organizers: any[];
 }
 
 const AdminDashboard = () => {
@@ -165,20 +171,42 @@ const AdminDashboard = () => {
         .select(`
           *,
           profiles:user_id (full_name, phone_number),
-          events (title)
+          events (title, id)
         `)
         .order('created_at', { ascending: false });
+
+      // Fetch payouts for commission tracking
+      const { data: payouts } = await supabase
+        .from('payouts')
+        .select(`
+          *,
+          events (title),
+          organizers (organization_name)
+        `)
+        .order('created_at', { ascending: false });
+
+      // Fetch organizers for payment verification
+      const { data: organizers } = await supabase
+        .from('organizers')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      // Calculate commission (10% of total revenue)
+      const totalCommission = totalRevenue * 0.1;
 
       setStats({
         totalUsers: usersCount || 0,
         totalEvents: eventsCount || 0,
         totalTickets: ticketsCount || 0,
         totalRevenue,
+        totalCommission,
         recentPayments: recentPayments || [],
         recentScans: recentScans || [],
         allUsers: allUsers || [],
         allEvents: allEvents || [],
-        allOrders: allOrders || []
+        allOrders: allOrders || [],
+        payouts: payouts || [],
+        organizers: organizers || []
       });
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -235,11 +263,12 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
+            <TabsTrigger value="commission">Commission</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
@@ -549,7 +578,7 @@ const AdminDashboard = () => {
 
           {/* Activity Log Tab */}
           <TabsContent value="activity" className="space-y-4">
-            <Card>
+            <Card className="border">
               <CardHeader>
                 <CardTitle>System Activity Log</CardTitle>
               </CardHeader>
@@ -579,6 +608,148 @@ const AdminDashboard = () => {
                       <p className="text-xs text-muted-foreground mt-1">{new Date().toLocaleString()}</p>
                     </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Commission Tab */}
+          <TabsContent value="commission" className="space-y-6">
+            {/* Commission Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="border">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Total Commission</CardTitle>
+                  <Percent className="h-4 w-4 text-green-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-500">
+                    KES {stats?.totalCommission?.toLocaleString() || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Platform earnings (10%)</p>
+                </CardContent>
+              </Card>
+
+              <Card className="border">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Organizer Payouts</CardTitle>
+                  <Wallet className="h-4 w-4 text-blue-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-blue-500">
+                    KES {((stats?.totalRevenue || 0) - (stats?.totalCommission || 0)).toLocaleString()}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Total paid to organizers</p>
+                </CardContent>
+              </Card>
+
+              <Card className="border">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Active Organizers</CardTitle>
+                  <Building className="h-4 w-4 text-primary" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats?.organizers?.length || 0}</div>
+                  <p className="text-xs text-muted-foreground">Registered organizers</p>
+                </CardContent>
+              </Card>
+
+              <Card className="border">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Pending Payouts</CardTitle>
+                  <DollarSign className="h-4 w-4 text-amber-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-amber-500">
+                    KES {stats?.payouts?.filter(p => p.payout_status === 'pending').reduce((sum, p) => sum + Number(p.organizer_payout), 0).toLocaleString() || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Awaiting settlement</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Commission by Event */}
+            <Card className="border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Revenue Breakdown
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="py-3 px-4 text-left text-xs font-medium text-muted-foreground uppercase">Event</th>
+                        <th className="py-3 px-4 text-right text-xs font-medium text-muted-foreground uppercase">Total Sales</th>
+                        <th className="py-3 px-4 text-right text-xs font-medium text-muted-foreground uppercase">Platform Fee</th>
+                        <th className="py-3 px-4 text-right text-xs font-medium text-muted-foreground uppercase">Organizer Payout</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {stats?.allEvents?.slice(0, 10).map((event: any) => {
+                        const eventRevenue = stats?.recentPayments
+                          ?.filter((p: any) => p.events?.id === event.id)
+                          ?.reduce((sum: number, p: any) => sum + Number(p.amount), 0) || 0;
+                        const platformFee = eventRevenue * 0.1;
+                        const organizerPayout = eventRevenue - platformFee;
+                        
+                        return (
+                          <tr key={event.id} className="border-b hover:bg-muted/50">
+                            <td className="py-3 px-4 font-medium">{event.title}</td>
+                            <td className="py-3 px-4 text-right">KES {eventRevenue.toLocaleString()}</td>
+                            <td className="py-3 px-4 text-right text-green-600">KES {platformFee.toLocaleString()}</td>
+                            <td className="py-3 px-4 text-right text-blue-600">KES {organizerPayout.toLocaleString()}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Organizer Payment Status */}
+            <Card className="border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building className="h-5 w-5" />
+                  Organizer Payment Verification
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="py-3 px-4 text-left text-xs font-medium text-muted-foreground uppercase">Organizer</th>
+                        <th className="py-3 px-4 text-center text-xs font-medium text-muted-foreground uppercase">Payment Setup</th>
+                        <th className="py-3 px-4 text-center text-xs font-medium text-muted-foreground uppercase">Status</th>
+                        <th className="py-3 px-4 text-right text-xs font-medium text-muted-foreground uppercase">Total Earnings</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {stats?.organizers?.map((org: any) => (
+                        <tr key={org.id} className="border-b hover:bg-muted/50">
+                          <td className="py-3 px-4 font-medium">{org.organization_name}</td>
+                          <td className="py-3 px-4 text-center">
+                            <Badge variant={org.verified ? "default" : "secondary"}>
+                              {org.verified ? "Complete" : "Pending"}
+                            </Badge>
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            {org.verified ? (
+                              <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                            ) : (
+                              <AlertCircle className="h-5 w-5 text-amber-500 mx-auto" />
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-right">KES 0</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </CardContent>
             </Card>

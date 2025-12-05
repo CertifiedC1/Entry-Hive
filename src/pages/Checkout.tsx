@@ -6,10 +6,12 @@ import { ImageSlider } from '@/components/ImageSlider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { CreditCard, Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { CreditCard, Loader2, Smartphone, CheckCircle, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { processPayment, calculateSplit } from '@/services/paymentProcessor';
 
 interface CheckoutState {
   eventId: string;
@@ -26,7 +28,7 @@ const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [paymentMethod, setPaymentMethod] = useState<'paystack'>('paystack');
+  const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'paystack' | 'paypal'>('mpesa');
   const [processing, setProcessing] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
@@ -35,6 +37,7 @@ const Checkout = () => {
   });
   
   const state = location.state as CheckoutState;
+  const { platformFee, organizerPayout } = state ? calculateSplit(state.totalAmount) : { platformFee: 0, organizerPayout: 0 };
 
   useEffect(() => {
     if (!user || !state) {
@@ -105,30 +108,91 @@ const Checkout = () => {
         <div className="grid md:grid-cols-2 gap-8">
           {/* Payment Method */}
           <div className="space-y-6">
-            <Card>
+            <Card className="border">
               <CardHeader>
-                <CardTitle>Pay with</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Pay with</CardTitle>
+                  <Badge variant="outline" className="text-amber-500 border-amber-500">Test Mode</Badge>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                {/* MPESA Option */}
+                <div 
+                  className={`rounded-lg border p-4 cursor-pointer transition-all ${
+                    paymentMethod === 'mpesa' 
+                      ? 'border-green-500 bg-green-500/10' 
+                      : 'border-border hover:border-green-500/50'
+                  }`}
+                  onClick={() => setPaymentMethod('mpesa')}
+                >
+                  <div className="flex items-center gap-3">
+                    <Smartphone className="h-6 w-6 text-green-500" />
+                    <div className="flex-1">
+                      <p className="font-semibold">MPESA</p>
+                      <p className="text-sm text-muted-foreground">
+                        Pay via mobile money (Test Mode)
+                      </p>
+                    </div>
+                    {paymentMethod === 'mpesa' && (
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Paystack Option */}
+                <div 
+                  className={`rounded-lg border p-4 cursor-pointer transition-all ${
+                    paymentMethod === 'paystack' 
+                      ? 'border-primary bg-primary/10' 
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                  onClick={() => setPaymentMethod('paystack')}
+                >
                   <div className="flex items-center gap-3">
                     <CreditCard className="h-6 w-6 text-primary" />
                     <div className="flex-1">
-                      <p className="font-semibold">Paystack</p>
+                      <p className="font-semibold">Card Payment</p>
                       <p className="text-sm text-muted-foreground">
-                        Secure payment via Paystack - Cards, Bank Transfer, Mobile Money
+                        Visa, Mastercard, Bank Transfer (Test Mode)
                       </p>
                     </div>
+                    {paymentMethod === 'paystack' && (
+                      <CheckCircle className="h-5 w-5 text-primary" />
+                    )}
                   </div>
                 </div>
+
+                {/* PayPal Option */}
+                <div 
+                  className={`rounded-lg border p-4 cursor-pointer transition-all ${
+                    paymentMethod === 'paypal' 
+                      ? 'border-blue-500 bg-blue-500/10' 
+                      : 'border-border hover:border-blue-500/50'
+                  }`}
+                  onClick={() => setPaymentMethod('paypal')}
+                >
+                  <div className="flex items-center gap-3">
+                    <DollarSign className="h-6 w-6 text-blue-500" />
+                    <div className="flex-1">
+                      <p className="font-semibold">PayPal</p>
+                      <p className="text-sm text-muted-foreground">
+                        Pay with PayPal (Test Mode)
+                      </p>
+                    </div>
+                    {paymentMethod === 'paypal' && (
+                      <CheckCircle className="h-5 w-5 text-blue-500" />
+                    )}
+                  </div>
+                </div>
+
                 <p className="text-xs text-muted-foreground">
-                  Payment is processed securely through Paystack. Supports Visa, Mastercard, Bank Transfer, and Mobile Money.
+                  All payments are in test mode. No real transactions will occur.
                 </p>
               </CardContent>
             </Card>
 
             {/* Billing Address */}
-            <Card>
+            <Card className="border">
               <CardHeader>
                 <CardTitle>Billing Address</CardTitle>
               </CardHeader>

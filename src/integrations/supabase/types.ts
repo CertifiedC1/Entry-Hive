@@ -146,6 +146,62 @@ export type Database = {
         }
         Relationships: []
       }
+      organizer_payment_settings: {
+        Row: {
+          created_at: string
+          id: string
+          mpesa_api_key: string | null
+          mpesa_api_secret: string | null
+          mpesa_callback_url: string | null
+          mpesa_passkey: string | null
+          mpesa_shortcode: string | null
+          organizer_id: string
+          payment_setup_complete: boolean | null
+          paypal_connected: boolean | null
+          paypal_email: string | null
+          stripe_connected: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mpesa_api_key?: string | null
+          mpesa_api_secret?: string | null
+          mpesa_callback_url?: string | null
+          mpesa_passkey?: string | null
+          mpesa_shortcode?: string | null
+          organizer_id: string
+          payment_setup_complete?: boolean | null
+          paypal_connected?: boolean | null
+          paypal_email?: string | null
+          stripe_connected?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mpesa_api_key?: string | null
+          mpesa_api_secret?: string | null
+          mpesa_callback_url?: string | null
+          mpesa_passkey?: string | null
+          mpesa_shortcode?: string | null
+          organizer_id?: string
+          payment_setup_complete?: boolean | null
+          paypal_connected?: boolean | null
+          paypal_email?: string | null
+          stripe_connected?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organizer_payment_settings_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: true
+            referencedRelation: "organizers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizers: {
         Row: {
           contact_email: string | null
@@ -234,6 +290,100 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      payouts: {
+        Row: {
+          created_at: string
+          event_id: string | null
+          id: string
+          organizer_id: string
+          organizer_payout: number
+          payment_id: string | null
+          payout_method: string | null
+          payout_status: string
+          platform_fee: number
+          processed_at: string | null
+          total_amount: number
+          transaction_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          organizer_id: string
+          organizer_payout: number
+          payment_id?: string | null
+          payout_method?: string | null
+          payout_status?: string
+          platform_fee: number
+          processed_at?: string | null
+          total_amount: number
+          transaction_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          organizer_id?: string
+          organizer_payout?: number
+          payment_id?: string | null
+          payout_method?: string | null
+          payout_status?: string
+          platform_fee?: number
+          processed_at?: string | null
+          total_amount?: number
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payouts_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
