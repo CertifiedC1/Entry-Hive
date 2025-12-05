@@ -59,6 +59,19 @@ const CreateEvent = () => {
       return;
     }
 
+    // Check if payment setup is complete
+    const { data: paymentSettings } = await supabase
+      .from('organizer_payment_settings')
+      .select('payment_setup_complete')
+      .eq('organizer_id', data.id)
+      .single();
+
+    if (!paymentSettings?.payment_setup_complete) {
+      toast.info('Please complete payment setup before creating an event');
+      navigate('/organizer/payment-setup');
+      return;
+    }
+
     setOrganizerId(data.id);
   };
 
