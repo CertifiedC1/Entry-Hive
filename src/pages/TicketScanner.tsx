@@ -52,8 +52,8 @@ const TicketScanner = () => {
     setScanResult(null);
 
     try {
-      // Fetch ticket details
-      const { data: ticket, error } = await supabase
+      // First try exact match with qr_code
+      let { data: ticket, error } = await supabase
         .from('tickets')
         .select(`
           id,
@@ -72,6 +72,62 @@ const TicketScanner = () => {
         `)
         .eq('qr_code', codeToScan.trim())
         .single();
+
+      // If not found, try matching by ticket_number (in case QR contains ticket number)
+      if (error || !ticket) {
+        const { data: ticketByNumber, error: numberError } = await supabase
+          .from('tickets')
+          .select(`
+            id,
+            ticket_number,
+            attendee_name,
+            status,
+            qr_code,
+            event:events (
+              title,
+              event_date,
+              venue
+            ),
+            ticket_type:ticket_types (
+              name
+            )
+          `)
+          .eq('ticket_number', codeToScan.trim())
+          .single();
+        
+        if (!numberError && ticketByNumber) {
+          ticket = ticketByNumber;
+          error = null;
+        }
+      }
+
+      // If still not found, try partial match (QR code contains the scanned value)
+      if (error || !ticket) {
+        const { data: tickets, error: likeError } = await supabase
+          .from('tickets')
+          .select(`
+            id,
+            ticket_number,
+            attendee_name,
+            status,
+            qr_code,
+            event:events (
+              title,
+              event_date,
+              venue
+            ),
+            ticket_type:ticket_types (
+              name
+            )
+          `)
+          .ilike('qr_code', `%${codeToScan.trim()}%`)
+          .limit(1);
+        
+        if (!likeError && tickets && tickets.length > 0) {
+          ticket = tickets[0];
+          error = null;
+        }
+      }
 
       if (error || !ticket) {
         setScanResult({
@@ -206,6 +262,7 @@ const TicketScanner = () => {
                       description: error,
                       variant: 'destructive'
                     })}
+                    showValidateButton={true}
                   />
                 </TabsContent>
 
