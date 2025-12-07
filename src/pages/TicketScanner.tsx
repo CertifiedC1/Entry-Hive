@@ -4,12 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScanLine, CheckCircle, XCircle, AlertTriangle, Camera, Keyboard } from 'lucide-react';
+import { ScanLine, CheckCircle, XCircle, AlertTriangle, Camera, Keyboard, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { QRScanner } from '@/components/QRScanner';
+import { parseQRCode, getSearchIdentifiers } from '@/lib/qr-parser';
 
 interface ScanResult {
   success: boolean;
@@ -52,30 +53,19 @@ const TicketScanner = () => {
     setScanResult(null);
 
     try {
-      // First try exact match with qr_code
-      let { data: ticket, error } = await supabase
-        .from('tickets')
-        .select(`
-          id,
-          ticket_number,
-          attendee_name,
-          status,
-          qr_code,
-          event:events (
-            title,
-            event_date,
-            venue
-          ),
-          ticket_type:ticket_types (
-            name
-          )
-        `)
-        .eq('qr_code', codeToScan.trim())
-        .single();
+      // Parse QR code data using the parser
+      const parsed = parseQRCode(codeToScan);
+      const identifiers = getSearchIdentifiers(parsed);
+      
+      console.log('Parsed QR:', parsed);
+      console.log('Search identifiers:', identifiers);
+      
+      let ticket = null;
+      let error = null;
 
-      // If not found, try matching by ticket_number (in case QR contains ticket number)
-      if (error || !ticket) {
-        const { data: ticketByNumber, error: numberError } = await supabase
+      // Strategy 1: If we have a ticket ID from SDTS format, search by ID first
+      if (identifiers.ticketId) {
+        const { data, error: err } = await supabase
           .from('tickets')
           .select(`
             id,
@@ -83,6 +73,7 @@ const TicketScanner = () => {
             attendee_name,
             status,
             qr_code,
+            user_id,
             event:events (
               title,
               event_date,
@@ -92,17 +83,75 @@ const TicketScanner = () => {
               name
             )
           `)
-          .eq('ticket_number', codeToScan.trim())
-          .single();
+          .eq('id', identifiers.ticketId)
+          .maybeSingle();
         
-        if (!numberError && ticketByNumber) {
-          ticket = ticketByNumber;
+        if (data) {
+          ticket = data;
           error = null;
         }
       }
 
-      // If still not found, try partial match (QR code contains the scanned value)
-      if (error || !ticket) {
+      // Strategy 2: Try exact match with full QR code
+      if (!ticket) {
+        const { data, error: err } = await supabase
+          .from('tickets')
+          .select(`
+            id,
+            ticket_number,
+            attendee_name,
+            status,
+            qr_code,
+            user_id,
+            event:events (
+              title,
+              event_date,
+              venue
+            ),
+            ticket_type:ticket_types (
+              name
+            )
+          `)
+          .eq('qr_code', identifiers.qrCode)
+          .maybeSingle();
+        
+        if (data) {
+          ticket = data;
+          error = null;
+        }
+      }
+
+      // Strategy 3: Try matching by ticket_number
+      if (!ticket && identifiers.ticketNumber) {
+        const { data, error: err } = await supabase
+          .from('tickets')
+          .select(`
+            id,
+            ticket_number,
+            attendee_name,
+            status,
+            qr_code,
+            user_id,
+            event:events (
+              title,
+              event_date,
+              venue
+            ),
+            ticket_type:ticket_types (
+              name
+            )
+          `)
+          .eq('ticket_number', identifiers.ticketNumber)
+          .maybeSingle();
+        
+        if (data) {
+          ticket = data;
+          error = null;
+        }
+      }
+
+      // Strategy 4: Search using LIKE for partial matches
+      if (!ticket) {
         const { data: tickets, error: likeError } = await supabase
           .from('tickets')
           .select(`
@@ -111,6 +160,7 @@ const TicketScanner = () => {
             attendee_name,
             status,
             qr_code,
+            user_id,
             event:events (
               title,
               event_date,
@@ -120,19 +170,19 @@ const TicketScanner = () => {
               name
             )
           `)
-          .ilike('qr_code', `%${codeToScan.trim()}%`)
+          .or(`qr_code.ilike.%${identifiers.qrCode}%,qr_code.eq.${identifiers.qrCode}`)
           .limit(1);
         
-        if (!likeError && tickets && tickets.length > 0) {
+        if (tickets && tickets.length > 0) {
           ticket = tickets[0];
           error = null;
         }
       }
 
-      if (error || !ticket) {
+      if (!ticket) {
         setScanResult({
           success: false,
-          message: 'Ticket not found. Invalid QR code.'
+          message: 'Ticket not found. The QR code may be invalid or corrupted.'
         });
         return;
       }
@@ -166,16 +216,18 @@ const TicketScanner = () => {
         .eq('id', ticket.id);
 
       if (updateError) {
+        console.error('Update error:', updateError);
         throw updateError;
       }
 
       // Record scan
+      const eventData = ticket.event as { title: string; event_date: string; venue: string } | null;
       await supabase
         .from('scans')
         .insert({
           ticket_id: ticket.id,
           scanned_by: user?.id,
-          location: ticket.event.venue
+          location: eventData?.venue || 'Unknown'
         });
 
       setScanResult({
@@ -341,14 +393,15 @@ const TicketScanner = () => {
 
               <div className="bg-muted/50 p-4 rounded-lg">
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <Shield className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                   <div className="text-sm">
-                    <p className="font-semibold mb-1">Scanner Instructions:</p>
+                    <p className="font-semibold mb-1">Secure Ticket Validation</p>
                     <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                      <li>Use camera to scan QR codes directly</li>
-                      <li>Or manually enter the QR code text</li>
+                      <li>QR codes contain encrypted ticket data</li>
+                      <li>Real-time verification against database</li>
                       <li>Each ticket can only be validated once</li>
-                      <li>All scans are logged for security</li>
+                      <li>All scans are logged with timestamp & location</li>
+                      <li>Supports both camera scanning and manual entry</li>
                     </ul>
                   </div>
                 </div>

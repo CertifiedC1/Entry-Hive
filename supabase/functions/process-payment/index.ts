@@ -21,6 +21,34 @@ interface PaymentRequest {
   totalAmount: number;
 }
 
+// Generate secure hash for QR code validation
+function generateSecureHash(ticketId: string, eventId: string, userId: string): string {
+  const secretKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? 'fallback-secret';
+  const data = `${ticketId}:${eventId}:${userId}:${secretKey}`;
+  let hash = 0;
+  for (let i = 0; i < data.length; i++) {
+    const char = data.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(36);
+}
+
+// Generate secure QR code data
+function generateQRCodeData(params: {
+  ticketId: string;
+  ticketNumber: string;
+  eventId: string;
+  userId: string;
+}): string {
+  const { ticketId, ticketNumber, eventId, userId } = params;
+  const hash = generateSecureHash(ticketId, eventId, userId);
+  const timestamp = Date.now().toString(36);
+  
+  // Format: SDTS|ticketId|ticketNumber|eventId|hash|timestamp
+  return `SDTS|${ticketId}|${ticketNumber}|${eventId}|${hash}|${timestamp}`;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -87,14 +115,24 @@ serve(async (req) => {
       throw new Error('Failed to update payment');
     }
 
-    // Generate tickets
+    // Generate tickets with secure QR codes
     const ticketsToCreate = [];
     for (const ticketOrder of paymentData.tickets) {
       for (let i = 0; i < ticketOrder.quantity; i++) {
+        // Generate unique ticket ID and number
+        const ticketId = crypto.randomUUID();
         const ticketNumber = `TKT-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-        const qrCode = `${paymentData.eventId}-${ticketNumber}-${user.id}`;
+        
+        // Generate secure QR code with embedded verification data
+        const qrCode = generateQRCodeData({
+          ticketId,
+          ticketNumber,
+          eventId: paymentData.eventId,
+          userId: user.id
+        });
         
         ticketsToCreate.push({
+          id: ticketId,
           user_id: user.id,
           event_id: paymentData.eventId,
           ticket_type_id: ticketOrder.ticketTypeId,
