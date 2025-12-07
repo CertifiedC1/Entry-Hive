@@ -39,7 +39,7 @@ interface Event {
   organizers: {
     organization_name: string;
     logo_url: string | null;
-  };
+  } | null;
 }
 
 const EventDetails = () => {
@@ -240,23 +240,25 @@ const EventDetails = () => {
             <Separator className="my-4 md:my-6" />
 
             {/* Organizer */}
-            <div>
-              <h2 className="mb-3 text-xl md:text-2xl font-bold">Organized By</h2>
-              <div className="flex items-center gap-3">
-                {event.organizers.logo_url ? (
-                  <img
-                    src={event.organizers.logo_url}
-                    alt={event.organizers.organization_name}
-                    className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    {event.organizers.organization_name.charAt(0)}
-                  </div>
-                )}
-                <p className="font-semibold text-sm md:text-base">{event.organizers.organization_name}</p>
+            {event.organizers && (
+              <div>
+                <h2 className="mb-3 text-xl md:text-2xl font-bold">Organized By</h2>
+                <div className="flex items-center gap-3">
+                  {event.organizers.logo_url ? (
+                    <img
+                      src={event.organizers.logo_url}
+                      alt={event.organizers.organization_name}
+                      className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                      {event.organizers.organization_name.charAt(0)}
+                    </div>
+                  )}
+                  <p className="font-semibold text-sm md:text-base">{event.organizers.organization_name}</p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Ticket Selection Sidebar */}
