@@ -7,8 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Eye, EyeOff, Ticket } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
+import { EntryHiveLogo } from '@/components/EntryHiveLogo';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -158,9 +159,8 @@ const Auth = () => {
     >
       <Card className="w-full max-w-md backdrop-blur-sm bg-card/95 animate-fade-in">
         <CardHeader className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Ticket className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-primary">Tiko</span>
+          <div className="flex items-center justify-center mb-2">
+            <EntryHiveLogo size="lg" />
           </div>
           <CardTitle className="text-2xl">Welcome</CardTitle>
           <CardDescription>Sign in to your account or create a new one</CardDescription>

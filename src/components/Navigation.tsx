@@ -1,6 +1,6 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Ticket, User, LogOut, ShoppingCart, LayoutDashboard, Menu, X } from 'lucide-react';
+import { User, LogOut, ShoppingCart, LayoutDashboard, Menu, X, Ticket } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { EntryHiveLogo } from './EntryHiveLogo';
 
 export const Navigation = () => {
   const { user, signOut } = useAuth();
@@ -74,9 +75,8 @@ export const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 text-xl font-bold text-primary">
-            <Ticket className="h-6 w-6" />
-            <span>Tiko</span>
+          <Link to="/" className="flex items-center">
+            <EntryHiveLogo size="md" />
           </Link>
 
           {/* Desktop Navigation - Centered */}
