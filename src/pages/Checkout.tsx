@@ -28,7 +28,7 @@ const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'paystack' | 'paypal'>('mpesa');
+  const [processing, setProcessing] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
@@ -76,7 +76,7 @@ const Checkout = () => {
           tickets: Object.entries(state.selectedTickets)
             .filter(([_, qty]) => qty > 0)
             .map(([ticketTypeId, quantity]) => ({ ticketTypeId, quantity })),
-          paymentMethod: paymentMethod,
+          paymentMethod: 'mpesa',
           customerInfo: customerInfo,
           totalAmount: state.totalAmount
         }
@@ -116,77 +116,22 @@ const Checkout = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* MPESA Option */}
-                <div 
-                  className={`rounded-lg border p-4 cursor-pointer transition-all ${
-                    paymentMethod === 'mpesa' 
-                      ? 'border-green-500 bg-green-500/10' 
-                      : 'border-border hover:border-green-500/50'
-                  }`}
-                  onClick={() => setPaymentMethod('mpesa')}
-                >
+                {/* MPESA Only */}
+                <div className="rounded-lg border border-green-500 bg-green-500/10 p-4">
                   <div className="flex items-center gap-3">
                     <Smartphone className="h-6 w-6 text-green-500" />
                     <div className="flex-1">
-                      <p className="font-semibold">MPESA</p>
+                      <p className="font-semibold">M-PESA</p>
                       <p className="text-sm text-muted-foreground">
-                        Pay via mobile money (Test Mode)
+                        Pay via Safaricom M-PESA
                       </p>
                     </div>
-                    {paymentMethod === 'mpesa' && (
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                    )}
-                  </div>
-                </div>
-
-                {/* Paystack Option */}
-                <div 
-                  className={`rounded-lg border p-4 cursor-pointer transition-all ${
-                    paymentMethod === 'paystack' 
-                      ? 'border-primary bg-primary/10' 
-                      : 'border-border hover:border-primary/50'
-                  }`}
-                  onClick={() => setPaymentMethod('paystack')}
-                >
-                  <div className="flex items-center gap-3">
-                    <CreditCard className="h-6 w-6 text-primary" />
-                    <div className="flex-1">
-                      <p className="font-semibold">Card Payment</p>
-                      <p className="text-sm text-muted-foreground">
-                        Visa, Mastercard, Bank Transfer (Test Mode)
-                      </p>
-                    </div>
-                    {paymentMethod === 'paystack' && (
-                      <CheckCircle className="h-5 w-5 text-primary" />
-                    )}
-                  </div>
-                </div>
-
-                {/* PayPal Option */}
-                <div 
-                  className={`rounded-lg border p-4 cursor-pointer transition-all ${
-                    paymentMethod === 'paypal' 
-                      ? 'border-blue-500 bg-blue-500/10' 
-                      : 'border-border hover:border-blue-500/50'
-                  }`}
-                  onClick={() => setPaymentMethod('paypal')}
-                >
-                  <div className="flex items-center gap-3">
-                    <DollarSign className="h-6 w-6 text-blue-500" />
-                    <div className="flex-1">
-                      <p className="font-semibold">PayPal</p>
-                      <p className="text-sm text-muted-foreground">
-                        Pay with PayPal (Test Mode)
-                      </p>
-                    </div>
-                    {paymentMethod === 'paypal' && (
-                      <CheckCircle className="h-5 w-5 text-blue-500" />
-                    )}
+                    <CheckCircle className="h-5 w-5 text-green-500" />
                   </div>
                 </div>
 
                 <p className="text-xs text-muted-foreground">
-                  All payments are in test mode. No real transactions will occur.
+                  You will receive an STK push on your phone to complete the payment.
                 </p>
               </CardContent>
             </Card>

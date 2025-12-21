@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/useAuth";
+import { SessionTimeoutWrapper } from "@/components/SessionTimeoutWrapper";
 import Index from "./pages/Index";
 import Events from "./pages/Events";
 import Profile from "./pages/Profile";
@@ -25,6 +26,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
 import OrganizerPaymentSetup from "./pages/OrganizerPaymentSetup";
 import OrganizerPayouts from "./pages/OrganizerPayouts";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 const queryClient = new QueryClient();
 
@@ -36,28 +38,31 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/events/:id" element={<EventDetails />} />
-              <Route path="/attendee-details" element={<AttendeeDetails />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/my-tickets" element={<MyTickets />} />
-              <Route path="/organizer-dashboard" element={<OrganizerDashboard />} />
-              <Route path="/create-event" element={<CreateEvent />} />
-              <Route path="/create-organizer" element={<CreateOrganizer />} />
-              <Route path="/ticket-scanner" element={<TicketScanner />} />
-              <Route path="/admin-dashboard" element={<AdminDashboard />} />
-              <Route path="/organizer/payment-setup" element={<OrganizerPaymentSetup />} />
-              <Route path="/organizer/payouts" element={<OrganizerPayouts />} />
-              <Route path="/about" element={<AboutUs />} />
-              <Route path="/contact" element={<ContactUs />} />
-              <Route path="/terms" element={<TermsAndConditions />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <SessionTimeoutWrapper>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/events" element={<Events />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/events/:id" element={<EventDetails />} />
+                <Route path="/attendee-details" element={<AttendeeDetails />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
+                <Route path="/my-tickets" element={<MyTickets />} />
+                <Route path="/organizer-dashboard" element={<OrganizerDashboard />} />
+                <Route path="/create-event" element={<CreateEvent />} />
+                <Route path="/create-organizer" element={<CreateOrganizer />} />
+                <Route path="/ticket-scanner" element={<TicketScanner />} />
+                <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                <Route path="/organizer/payment-setup" element={<OrganizerPaymentSetup />} />
+                <Route path="/organizer/payouts" element={<OrganizerPayouts />} />
+                <Route path="/about" element={<AboutUs />} />
+                <Route path="/contact" element={<ContactUs />} />
+                <Route path="/terms" element={<TermsAndConditions />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </SessionTimeoutWrapper>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

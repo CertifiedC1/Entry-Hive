@@ -43,6 +43,7 @@ const Events = () => {
   const fetchEvents = async () => {
     try {
       setLoading(true);
+      // Only fetch future events (event_date >= today)
       let query = supabase
         .from('events')
         .select(`
@@ -51,6 +52,7 @@ const Events = () => {
           ticket_types (price, quantity_available, quantity_sold)
         `)
         .eq('published', true)
+        .gte('event_date', new Date().toISOString())
         .order('event_date', { ascending: true });
 
       if (searchQuery) {

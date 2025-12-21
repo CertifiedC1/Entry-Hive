@@ -5,11 +5,13 @@ interface EntryHiveLogoProps {
   className?: string;
   showText?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  interactive?: boolean;
 }
 
-export const EntryHiveLogo = ({ className, showText = true, size = 'md' }: EntryHiveLogoProps) => {
+export const EntryHiveLogo = ({ className, showText = true, size = 'md', interactive = true }: EntryHiveLogoProps) => {
   const [beePosition, setBeePosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
+  const [textHoveredIndex, setTextHoveredIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const sizeClasses = {
@@ -25,17 +27,19 @@ export const EntryHiveLogo = ({ className, showText = true, size = 'md' }: Entry
   };
 
   useEffect(() => {
-    if (!isHovering) return;
+    if (!isHovering || !interactive) return;
 
     const interval = setInterval(() => {
       setBeePosition({
-        x: (Math.random() - 0.5) * 8,
-        y: (Math.random() - 0.5) * 8
+        x: (Math.random() - 0.5) * 12,
+        y: (Math.random() - 0.5) * 12
       });
-    }, 150);
+    }, 100);
 
     return () => clearInterval(interval);
-  }, [isHovering]);
+  }, [isHovering, interactive]);
+
+  const textLetters = 'EntryHive'.split('');
 
   return (
     <div 
@@ -175,10 +179,31 @@ export const EntryHiveLogo = ({ className, showText = true, size = 'md' }: Entry
 
       {showText && (
         <span className={cn(
-          "font-bold text-primary tracking-tight",
+          "font-bold text-primary tracking-tight flex",
           textSizes[size]
         )}>
-          EntryHive
+          {interactive ? (
+            textLetters.map((letter, index) => (
+              <span
+                key={index}
+                className="inline-block transition-all duration-150 cursor-default"
+                onMouseEnter={() => setTextHoveredIndex(index)}
+                onMouseLeave={() => setTextHoveredIndex(null)}
+                style={{
+                  transform: textHoveredIndex !== null && Math.abs(textHoveredIndex - index) <= 2
+                    ? `translateY(${-3 * (1 - Math.abs(textHoveredIndex - index) / 3)}px) scale(${1 + 0.08 * (1 - Math.abs(textHoveredIndex - index) / 3)})`
+                    : undefined,
+                  color: textHoveredIndex !== null && Math.abs(textHoveredIndex - index) <= 1
+                    ? 'hsl(45 100% 55%)'
+                    : undefined
+                }}
+              >
+                {letter}
+              </span>
+            ))
+          ) : (
+            'EntryHive'
+          )}
         </span>
       )}
     </div>
