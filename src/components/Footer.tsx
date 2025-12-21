@@ -1,5 +1,6 @@
-import { Facebook, Twitter, Instagram } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { EntryHiveLogo } from './EntryHiveLogo';
 
 export const Footer = () => {
   return (
@@ -8,9 +9,9 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo and Brand */}
           <div>
-            <h3 className="text-xl font-bold text-primary mb-4">Tiko</h3>
+            <EntryHiveLogo size="md" className="mb-4" />
             <p className="text-sm text-muted-foreground">
-              Your trusted event ticketing platform
+              Your trusted digital ticketing platform. Fast, secure, and fraud-resistant entry for all your events.
             </p>
           </div>
 
@@ -19,7 +20,7 @@ export const Footer = () => {
             <h4 className="font-semibold mb-4">Pages</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/events" className="text-muted-foreground hover:text-primary transition-colors">
                   Events
                 </Link>
               </li>
@@ -45,17 +46,16 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Contact Us</h4>
             <div className="space-y-2 text-sm text-muted-foreground">
-              <p className="font-semibold text-foreground">Tiko</p>
+              <p className="font-semibold text-foreground">EntryHive</p>
               <p>Nairobi, Kenya</p>
-              <p className="font-semibold text-foreground mt-4">Ticketing Issues:</p>
-              <a href="mailto:support@tiko.com" className="text-primary hover:underline">
-                support@tiko.com
+              <p className="font-semibold text-foreground mt-4">Support:</p>
+              <a href="mailto:support@entryhive.gmail.com" className="text-primary hover:underline">
+                support@entryhive.gmail.com
               </a>
-              <p className="font-semibold text-foreground mt-4">Event Listing:</p>
-              <a href="mailto:events@tiko.com" className="text-primary hover:underline">
-                events@tiko.com
+              <p className="font-semibold text-foreground mt-4">Phone:</p>
+              <a href="tel:+254711653881" className="text-primary hover:underline">
+                +254 711 653 881
               </a>
-              <p>(+254) 712345678</p>
             </div>
           </div>
 
@@ -64,7 +64,7 @@ export const Footer = () => {
             <h4 className="font-semibold mb-4">Stay In Touch With Us</h4>
             <div className="flex gap-4">
               <a
-                href="https://facebook.com"
+                href="https://facebook.com/entryhive"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"
@@ -72,7 +72,7 @@ export const Footer = () => {
                 <Facebook className="h-5 w-5" />
               </a>
               <a
-                href="https://twitter.com"
+                href="https://twitter.com/entryhive"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"
@@ -80,12 +80,20 @@ export const Footer = () => {
                 <Twitter className="h-5 w-5" />
               </a>
               <a
-                href="https://instagram.com"
+                href="https://instagram.com/entryhive"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 <Instagram className="h-5 w-5" />
+              </a>
+              <a
+                href="https://linkedin.com/company/entryhive"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Linkedin className="h-5 w-5" />
               </a>
             </div>
           </div>
@@ -93,7 +101,7 @@ export const Footer = () => {
 
         <div className="border-t border-border mt-8 pt-6 text-center">
           <p className="text-sm text-muted-foreground">
-            © Copyright {new Date().getFullYear()} | Tiko
+            © Copyright {new Date().getFullYear()} | EntryHive - Digital Ticketing Platform
           </p>
         </div>
       </div>
