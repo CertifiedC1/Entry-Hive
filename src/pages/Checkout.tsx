@@ -29,7 +29,6 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [processing, setProcessing] = useState(false);
-  const [processing, setProcessing] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     email: '',
