@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { MapPin, Phone, Mail } from 'lucide-react';
+import { MapPin, Phone, Mail, Send } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { ScrollReveal } from '@/hooks/useScrollAnimation';
+import contactImage from '@/assets/contact-ticketing.jpg';
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -126,17 +128,24 @@ const ContactUs = () => {
       <div 
         className="relative py-16 md:py-20 px-4"
         style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=1920&q=80)',
+          backgroundImage: `url(${contactImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
       >
         <div className="absolute inset-0 bg-black/70" />
         <div className="container mx-auto relative z-10">
-          <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">Contact EntryHive</h1>
-          <p className="text-white/80 max-w-xl">
-            Have questions about our platform? We're here to help you make every event a success.
-          </p>
+          <ScrollReveal animation="fade-up">
+            <h1 className="text-3xl md:text-5xl font-bold mb-4">
+              <span className="text-gradient-gold">Contact</span>{' '}
+              <span className="text-white">EntryHive</span>
+            </h1>
+          </ScrollReveal>
+          <ScrollReveal animation="fade-up" delay={100}>
+            <p className="text-white/80 max-w-xl">
+              Have questions about our platform? We're here to help you make every event a success.
+            </p>
+          </ScrollReveal>
         </div>
       </div>
 
@@ -144,149 +153,149 @@ const ContactUs = () => {
         <div className="container mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 max-w-6xl mx-auto">
             {/* Contact Form */}
-            <div>
-              <p className="text-muted-foreground mb-6 md:mb-8 text-sm md:text-base">
-                Contact us about anything related to EntryHive events or services.<br />
-                We'll do our best to get back to you as soon as possible.
-              </p>
-              
-              <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
-                <div>
-                  <Label htmlFor="name">Your Name *</Label>
-                  <Input
-                    id="name"
-                    required
-                    value={formData.name}
-                    onChange={handleNameChange}
-                    placeholder="Enter your full name (2-4 names)"
-                    className={`mt-1 ${nameError ? 'border-destructive' : ''}`}
-                  />
-                  {nameError && (
-                    <p className="text-sm text-destructive mt-1">{nameError}</p>
-                  )}
-                </div>
+            <ScrollReveal animation="fade-right">
+              <div>
+                <p className="text-muted-foreground mb-6 md:mb-8 text-sm md:text-base">
+                  Contact us about anything related to EntryHive events or services.<br />
+                  We'll do our best to get back to you as soon as possible.
+                </p>
+                
+                <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+                  <div className="group">
+                    <Label htmlFor="name" className="group-focus-within:text-primary transition-colors">Your Name *</Label>
+                    <Input
+                      id="name"
+                      required
+                      value={formData.name}
+                      onChange={handleNameChange}
+                      placeholder="Enter your full name (2-4 names)"
+                      className={`mt-1 transition-all duration-300 focus:scale-[1.01] ${nameError ? 'border-destructive' : ''}`}
+                    />
+                    {nameError && (
+                      <p className="text-sm text-destructive mt-1 animate-fade-in">{nameError}</p>
+                    )}
+                  </div>
 
-                <div>
-                  <Label htmlFor="phone">Phone Number *</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    required
-                    maxLength={13}
-                    value={formData.phone}
-                    onChange={handlePhoneChange}
-                    placeholder="Enter your phone number"
-                    className={`mt-1 ${phoneError ? 'border-destructive' : ''}`}
-                  />
-                  {phoneError && (
-                    <p className="text-sm text-destructive mt-1">{phoneError}</p>
-                  )}
-                </div>
+                  <div className="group">
+                    <Label htmlFor="phone" className="group-focus-within:text-primary transition-colors">Phone Number *</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      required
+                      maxLength={13}
+                      value={formData.phone}
+                      onChange={handlePhoneChange}
+                      placeholder="Enter your phone number"
+                      className={`mt-1 transition-all duration-300 focus:scale-[1.01] ${phoneError ? 'border-destructive' : ''}`}
+                    />
+                    {phoneError && (
+                      <p className="text-sm text-destructive mt-1 animate-fade-in">{phoneError}</p>
+                    )}
+                  </div>
 
-                <div>
-                  <Label htmlFor="email">Your Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="mt-1"
-                  />
-                </div>
+                  <div className="group">
+                    <Label htmlFor="email" className="group-focus-within:text-primary transition-colors">Your Email *</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      className="mt-1 transition-all duration-300 focus:scale-[1.01]"
+                    />
+                  </div>
 
-                <div>
-                  <Label htmlFor="company">Your Company</Label>
-                  <Input
-                    id="company"
-                    value={formData.company}
-                    onChange={(e) => setFormData({...formData, company: e.target.value})}
-                    className="mt-1"
-                  />
-                </div>
+                  <div className="group">
+                    <Label htmlFor="company" className="group-focus-within:text-primary transition-colors">Your Company</Label>
+                    <Input
+                      id="company"
+                      value={formData.company}
+                      onChange={(e) => setFormData({...formData, company: e.target.value})}
+                      className="mt-1 transition-all duration-300 focus:scale-[1.01]"
+                    />
+                  </div>
 
-                <div>
-                  <Label htmlFor="subject">Subject *</Label>
-                  <Input
-                    id="subject"
-                    required
-                    value={formData.subject}
-                    onChange={(e) => setFormData({...formData, subject: e.target.value})}
-                    className="mt-1"
-                  />
-                </div>
+                  <div className="group">
+                    <Label htmlFor="subject" className="group-focus-within:text-primary transition-colors">Subject *</Label>
+                    <Input
+                      id="subject"
+                      required
+                      value={formData.subject}
+                      onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                      className="mt-1 transition-all duration-300 focus:scale-[1.01]"
+                    />
+                  </div>
 
-                <div>
-                  <Label htmlFor="question">Your Message</Label>
-                  <Textarea
-                    id="question"
-                    rows={5}
-                    value={formData.question}
-                    onChange={(e) => setFormData({...formData, question: e.target.value})}
-                    className="mt-1"
-                  />
-                </div>
+                  <div className="group">
+                    <Label htmlFor="question" className="group-focus-within:text-primary transition-colors">Your Message</Label>
+                    <Textarea
+                      id="question"
+                      rows={5}
+                      value={formData.question}
+                      onChange={(e) => setFormData({...formData, question: e.target.value})}
+                      className="mt-1 transition-all duration-300 focus:scale-[1.01]"
+                    />
+                  </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full md:w-auto px-12"
-                  disabled={!!nameError || !!phoneError}
-                >
-                  Submit
-                </Button>
-              </form>
-            </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full md:w-auto px-12 hover-lift click-shrink hover-glow"
+                    disabled={!!nameError || !!phoneError}
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    Submit
+                  </Button>
+                </form>
+              </div>
+            </ScrollReveal>
 
             {/* Contact Info */}
-            <div className="space-y-6 md:space-y-8">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">EntryHive</h2>
-                
-                <div className="space-y-4 md:space-y-6">
-                  <div className="flex items-start gap-4">
-                    <MapPin className="h-5 w-5 md:h-6 md:w-6 text-primary mt-1 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold mb-1">Address</p>
-                      <p className="text-muted-foreground text-sm md:text-base">Nairobi, Kenya</p>
+            <ScrollReveal animation="fade-left" delay={200}>
+              <div className="space-y-6 md:space-y-8">
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8 text-gradient-gold">EntryHive</h2>
+                  
+                  <div className="space-y-4 md:space-y-6">
+                    <div className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted/50 transition-colors cursor-default group">
+                      <MapPin className="h-5 w-5 md:h-6 md:w-6 text-primary mt-1 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                      <div>
+                        <p className="font-semibold mb-1">Address</p>
+                        <p className="text-muted-foreground text-sm md:text-base">Nairobi, Kenya</p>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-start gap-4">
-                    <Phone className="h-5 w-5 md:h-6 md:w-6 text-primary mt-1 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold mb-1">Phone</p>
-                      <a href="tel:+254711653881" className="text-primary hover:underline text-sm md:text-base">
-                        +254 711 653 881
-                      </a>
+                    <div className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted/50 transition-colors cursor-default group">
+                      <Phone className="h-5 w-5 md:h-6 md:w-6 text-primary mt-1 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                      <div>
+                        <p className="font-semibold mb-1">Phone</p>
+                        <a href="tel:+254711653881" className="text-primary hover:underline text-sm md:text-base link-underline">
+                          +254 711 653 881
+                        </a>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-start gap-4">
-                    <Mail className="h-5 w-5 md:h-6 md:w-6 text-primary mt-1 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold mb-1">Email</p>
-                      <a href="mailto:support@entryhive.gmail.com" className="text-primary hover:underline text-sm md:text-base">
-                        support@entryhive.gmail.com
-                      </a>
+                    <div className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted/50 transition-colors cursor-default group">
+                      <Mail className="h-5 w-5 md:h-6 md:w-6 text-primary mt-1 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                      <div>
+                        <p className="font-semibold mb-1">Email</p>
+                        <a href="mailto:support@entryhive.com" className="text-primary hover:underline text-sm md:text-base link-underline">
+                          support@entryhive.com
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Nairobi image */}
-              <div 
-                className="w-full h-64 md:h-80 rounded-lg overflow-hidden shadow-lg"
-                style={{
-                  backgroundImage: 'url(https://images.unsplash.com/photo-1611348586804-61bf6c080437?w=800&q=80)',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }}
-              >
-                <div className="w-full h-full bg-gradient-to-t from-black/40 to-transparent flex items-end p-4">
-                  <p className="text-white font-semibold">Nairobi, Kenya 🇰🇪</p>
+                {/* Ticketing image */}
+                <div className="w-full h-64 md:h-80 rounded-lg overflow-hidden shadow-lg card-interactive">
+                  <img 
+                    src={contactImage} 
+                    alt="Digital ticketing experience" 
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                  />
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
