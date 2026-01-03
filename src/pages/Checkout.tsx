@@ -91,26 +91,35 @@ const Checkout = () => {
           `)
           .eq('payment_id', paymentId);
 
-        // Navigate to success page with ticket data
-        setTimeout(() => {
-          navigate('/payment-success', {
-            state: {
+        // Send ticket email
+        try {
+          await supabase.functions.invoke('send-ticket-email', {
+            body: {
+              email: customerInfo.email,
+              name: customerInfo.name,
+              phone: customerInfo.phone,
+              tickets: tickets?.map(t => ({
+                ticket_number: t.ticket_number,
+                qr_code: t.qr_code,
+                ticket_type: (t.ticket_types as any)?.name || 'Standard',
+                price: (t.ticket_types as any)?.price || 0
+              })) || [],
               eventTitle: state.eventTitle || 'Event',
               eventDate: state.eventDate || new Date().toISOString(),
               eventVenue: state.eventVenue || '',
               eventLocation: state.eventLocation || '',
-              tickets: tickets?.map(t => ({
-                id: t.id,
-                ticket_number: t.ticket_number,
-                qr_code: t.qr_code,
-                attendee_name: t.attendee_name,
-                ticket_type: (t.ticket_types as any)?.name || 'Standard',
-                price: (t.ticket_types as any)?.price || 0
-              })) || [],
               totalAmount: state.totalAmount,
               transactionId: payment.transaction_id || paymentId
             }
           });
+          console.log('Ticket email sent successfully');
+        } catch (emailError) {
+          console.error('Failed to send ticket email:', emailError);
+        }
+
+        // Navigate directly to My Tickets page
+        setTimeout(() => {
+          navigate('/my-tickets');
         }, 1500);
         return;
       }

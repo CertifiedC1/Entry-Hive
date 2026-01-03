@@ -17,8 +17,9 @@ All colors MUST be HSL.
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 0 86% 60%;
-    --primary-foreground: 0 0% 100%;
+    /* Golden primary color */
+    --primary: 43 74% 49%;
+    --primary-foreground: 0 0% 5%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -26,32 +27,29 @@ All colors MUST be HSL.
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 0 86% 60%;
-    --accent-foreground: 0 0% 100%;
+    /* Golden accent */
+    --accent: 43 74% 49%;
+    --accent-foreground: 0 0% 5%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 0 86% 60%;
+    --ring: 43 74% 49%;
 
     --radius: 0.5rem;
 
+    /* Golden gradient */
+    --gradient-gold: linear-gradient(135deg, hsl(43 74% 49%), hsl(38 92% 50%), hsl(43 74% 59%));
+
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -65,7 +63,8 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 0 86% 60%;
+    /* Golden primary for light mode */
+    --primary: 43 74% 45%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
@@ -74,7 +73,7 @@ All colors MUST be HSL.
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 0 86% 60%;
+    --accent: 43 74% 45%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
@@ -82,7 +81,7 @@ All colors MUST be HSL.
 
     --border: 220 13% 80%;
     --input: 220 13% 85%;
-    --ring: 0 86% 60%;
+    --ring: 43 74% 45%;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -112,6 +111,81 @@ All colors MUST be HSL.
   .animate-slide-up {
     animation: slideUp 0.4s ease-out forwards;
   }
+
+  /* Interactive hover effects */
+  .hover-lift {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .hover-lift:hover {
+    @apply -translate-y-1 shadow-lg;
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-300 ease-out;
+  }
+  
+  .hover-scale:hover {
+    @apply scale-105;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300;
+  }
+  
+  .hover-glow:hover {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.4);
+  }
+
+  .click-shrink {
+    @apply transition-transform duration-150;
+  }
+  
+  .click-shrink:active {
+    @apply scale-95;
+  }
+
+  /* Text gradient for golden effect */
+  .text-gradient-gold {
+    background: linear-gradient(135deg, hsl(43 74% 49%), hsl(38 92% 60%), hsl(43 74% 69%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Card interactive effect */
+  .card-interactive {
+    @apply transition-all duration-300 ease-out border-transparent;
+  }
+  
+  .card-interactive:hover {
+    @apply border-primary shadow-xl -translate-y-1;
+    box-shadow: 0 10px 40px -10px hsl(var(--primary) / 0.3);
+  }
+
+  /* Button pulse effect */
+  .btn-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Link underline animation */
+  .link-underline {
+    @apply relative;
+  }
+  
+  .link-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 origin-right transition-transform duration-300;
+  }
+  
+  .link-underline:hover::after {
+    @apply scale-x-100 origin-left;
+  }
+
+  /* Social icon hover */
+  .social-icon {
+    @apply transition-all duration-300 hover:text-primary hover:scale-125;
+  }
 }
 
 @keyframes fadeIn {
@@ -133,5 +207,14 @@ All colors MUST be HSL.
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
   }
 }

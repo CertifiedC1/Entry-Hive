@@ -69,14 +69,14 @@ const AboutUs = () => {
             <div className="flex items-center justify-center gap-3 mb-6">
               <span className="text-5xl animate-bounce">🐝</span>
               <h1 className="text-4xl md:text-5xl font-bold text-white">
-                About <InteractiveText text="EntryHive" className="text-primary" />
+                About <InteractiveText text="EntryHive" className="text-gradient-gold" />
               </h1>
             </div>
           </ScrollReveal>
           <ScrollReveal animation="fade-up" delay={200}>
             <div className="max-w-3xl mx-auto text-white/90 text-center">
               <p className="text-lg md:text-xl leading-relaxed">
-                EntryHive is a next-generation digital ticketing platform designed to simplify how events are created, 
+                <InteractiveText text="EntryHive is a next-generation digital ticketing platform" className="inline" /> designed to simplify how events are created, 
                 discovered, and experienced. Built for event organizers and attendees alike, EntryHive brings efficiency, 
                 security, and innovation together in one powerful ecosystem.
               </p>
@@ -90,16 +90,21 @@ const AboutUs = () => {
         <div className="container mx-auto max-w-4xl text-center">
           <ScrollReveal animation="fade-up">
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-              We believe ticketing should be <span className="text-primary font-semibold">fast</span>, 
-              <span className="text-primary font-semibold"> secure</span>, and 
-              <span className="text-primary font-semibold"> stress-free</span>. That's why EntryHive eliminates 
+              We believe ticketing should be <span className="text-gradient-gold font-semibold hover:scale-110 inline-block transition-transform cursor-default">fast</span>, 
+              <span className="text-gradient-gold font-semibold hover:scale-110 inline-block transition-transform cursor-default mx-1"> secure</span>, and 
+              <span className="text-gradient-gold font-semibold hover:scale-110 inline-block transition-transform cursor-default"> stress-free</span>. That's why EntryHive eliminates 
               the complexity often associated with event access—replacing long queues, paper tickets, and 
               unreliable systems with smart, digital-first solutions.
             </p>
           </ScrollReveal>
           <ScrollReveal animation="fade-up" delay={150}>
             <p className="mt-6 text-lg text-muted-foreground">
-              Whether it's a concert, conference, sports event, church gathering, school function, or community meetup, 
+              Whether it's a <span className="hover:text-primary transition-colors cursor-default">concert</span>, 
+              <span className="hover:text-primary transition-colors cursor-default"> conference</span>, 
+              <span className="hover:text-primary transition-colors cursor-default"> sports event</span>, 
+              <span className="hover:text-primary transition-colors cursor-default"> church gathering</span>, 
+              <span className="hover:text-primary transition-colors cursor-default"> school function</span>, or 
+              <span className="hover:text-primary transition-colors cursor-default"> community meetup</span>, 
               EntryHive ensures that every entry is smooth and every experience begins on the right note.
             </p>
           </ScrollReveal>
@@ -111,29 +116,29 @@ const AboutUs = () => {
         <div className="container mx-auto">
           <ScrollReveal animation="fade-up">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-              <InteractiveText text="2025 at a Glance" />
+              <InteractiveText text="2025 at a Glance" className="text-gradient-gold" />
             </h2>
           </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <ScrollReveal animation="scale" delay={0}>
-              <div className="text-center p-6 rounded-xl bg-card border hover:border-primary transition-all duration-300 hover:scale-105">
+              <div className="text-center p-6 rounded-xl bg-card border card-interactive">
                 <Calendar className="h-12 w-12 mx-auto mb-4 text-primary" />
                 <p className="text-muted-foreground mb-2">Events in slightly over year</p>
-                <p className="text-4xl font-bold text-primary"><AnimatedCounter end={2} /></p>
+                <p className="text-4xl font-bold text-gradient-gold"><AnimatedCounter end={2} /></p>
               </div>
             </ScrollReveal>
             <ScrollReveal animation="scale" delay={150}>
-              <div className="text-center p-6 rounded-xl bg-card border hover:border-primary transition-all duration-300 hover:scale-105">
+              <div className="text-center p-6 rounded-xl bg-card border card-interactive">
                 <Users className="h-12 w-12 mx-auto mb-4 text-primary" />
                 <p className="text-muted-foreground mb-2">Active Users</p>
-                <p className="text-4xl font-bold text-primary"><AnimatedCounter end={15} suffix="K" /></p>
+                <p className="text-4xl font-bold text-gradient-gold"><AnimatedCounter end={15} suffix="K" /></p>
               </div>
             </ScrollReveal>
             <ScrollReveal animation="scale" delay={300}>
-              <div className="text-center p-6 rounded-xl bg-card border hover:border-primary transition-all duration-300 hover:scale-105">
+              <div className="text-center p-6 rounded-xl bg-card border card-interactive">
                 <Ticket className="h-12 w-12 mx-auto mb-4 text-primary" />
                 <p className="text-muted-foreground mb-2">Total Tickets Sold</p>
-                <p className="text-4xl font-bold text-primary"><AnimatedCounter end={50} suffix="K+" /></p>
+                <p className="text-4xl font-bold text-gradient-gold"><AnimatedCounter end={50} suffix="K+" /></p>
               </div>
             </ScrollReveal>
           </div>
@@ -144,7 +149,7 @@ const AboutUs = () => {
       <section className="py-16 px-4 bg-muted/20">
         <div className="container mx-auto">
           <ScrollReveal animation="fade-up">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">🚀 What We Offer</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">🚀 <span className="text-gradient-gold">What We Offer</span></h2>
             <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
               At EntryHive, we provide a complete ticketing solution that supports events of all sizes
             </p>
@@ -159,9 +164,9 @@ const AboutUs = () => {
               { icon: CheckCircle, title: 'Reliable Payments', desc: 'Safe and seamless payment processing you can trust.' },
             ].map((item, index) => (
               <ScrollReveal key={index} animation="fade-up" delay={index * 100}>
-                <div className="p-6 rounded-xl bg-card border hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                  <item.icon className="h-8 w-8 text-primary mb-4" />
-                  <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
+                <div className="p-6 rounded-xl bg-card border card-interactive group cursor-default">
+                  <item.icon className="h-8 w-8 text-primary mb-4 group-hover:scale-125 transition-transform duration-300" />
+                  <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">{item.title}</h3>
                   <p className="text-muted-foreground text-sm">{item.desc}</p>
                 </div>
               </ScrollReveal>
@@ -175,7 +180,7 @@ const AboutUs = () => {
         <div className="container mx-auto">
           <ScrollReveal animation="fade-up">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-              <InteractiveText text="About Our Success" />
+              <InteractiveText text="About Our Success" className="text-gradient-gold" />
             </h2>
           </ScrollReveal>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
@@ -186,8 +191,8 @@ const AboutUs = () => {
               { value: 15, suffix: 'K+', label: 'Active Users' },
             ].map((stat, index) => (
               <ScrollReveal key={index} animation="scale" delay={index * 100}>
-                <div className="text-center p-4 md:p-6 rounded-lg bg-card border hover:border-primary transition-all duration-300 hover:scale-105">
-                  <p className="text-3xl md:text-5xl font-bold text-primary mb-2">
+                <div className="text-center p-4 md:p-6 rounded-lg bg-card border card-interactive">
+                  <p className="text-3xl md:text-5xl font-bold text-gradient-gold mb-2">
                     <AnimatedCounter end={stat.value} suffix={stat.suffix} />
                   </p>
                   <p className="text-sm md:text-base text-muted-foreground">{stat.label}</p>
@@ -202,7 +207,7 @@ const AboutUs = () => {
       <section className="py-16 px-4 bg-primary/5">
         <div className="container mx-auto">
           <ScrollReveal animation="fade-up">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">🌍 Why Choose EntryHive?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">🌍 <span className="text-gradient-gold">Why Choose EntryHive?</span></h2>
             <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
               What sets EntryHive apart is our commitment to simplicity, reliability, and growth.
             </p>
@@ -216,10 +221,10 @@ const AboutUs = () => {
               { icon: Zap, title: 'Always Evolving', desc: 'Constantly improving to meet modern event demands.' },
             ].map((item, index) => (
               <ScrollReveal key={index} animation="fade-left" delay={index * 100}>
-                <div className="flex items-start gap-4 p-4 hover:bg-card/50 rounded-lg transition-all duration-300">
-                  <item.icon className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
+                <div className="flex items-start gap-4 p-4 hover:bg-card/50 rounded-lg transition-all duration-300 group cursor-default hover:shadow-lg">
+                  <item.icon className="h-6 w-6 text-primary flex-shrink-0 mt-1 group-hover:scale-125 transition-transform" />
                   <div>
-                    <h3 className="font-semibold mb-1">{item.title}</h3>
+                    <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">{item.title}</h3>
                     <p className="text-sm text-muted-foreground">{item.desc}</p>
                   </div>
                 </div>
@@ -228,7 +233,7 @@ const AboutUs = () => {
           </div>
           <ScrollReveal animation="fade-up" delay={300}>
             <p className="text-center text-lg text-muted-foreground mt-8 max-w-2xl mx-auto">
-              EntryHive is not just a ticketing platform — it's a <span className="text-primary font-semibold">digital gateway</span> that connects people to experiences they care about.
+              EntryHive is not just a ticketing platform — it's a <span className="text-gradient-gold font-semibold">digital gateway</span> that connects people to experiences they care about.
             </p>
           </ScrollReveal>
         </div>
@@ -239,9 +244,9 @@ const AboutUs = () => {
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <ScrollReveal animation="fade-right">
-              <div className="p-8 rounded-xl bg-card border hover:border-primary transition-all duration-300 hover:scale-[1.02]">
-                <Target className="h-10 w-10 text-primary mb-4" />
-                <h3 className="text-2xl font-bold mb-4">🎯 Our Mission</h3>
+              <div className="p-8 rounded-xl bg-card border card-interactive group">
+                <Target className="h-10 w-10 text-primary mb-4 group-hover:scale-125 transition-transform" />
+                <h3 className="text-2xl font-bold mb-4">🎯 <span className="text-gradient-gold">Our Mission</span></h3>
                 <p className="text-muted-foreground leading-relaxed">
                   To empower event organizers with smart tools and give attendees a seamless, 
                   trustworthy way to access events—making every entry count.
@@ -249,9 +254,9 @@ const AboutUs = () => {
               </div>
             </ScrollReveal>
             <ScrollReveal animation="fade-left" delay={150}>
-              <div className="p-8 rounded-xl bg-card border hover:border-primary transition-all duration-300 hover:scale-[1.02]">
-                <Eye className="h-10 w-10 text-primary mb-4" />
-                <h3 className="text-2xl font-bold mb-4">🌟 Our Vision</h3>
+              <div className="p-8 rounded-xl bg-card border card-interactive group">
+                <Eye className="h-10 w-10 text-primary mb-4 group-hover:scale-125 transition-transform" />
+                <h3 className="text-2xl font-bold mb-4">🌟 <span className="text-gradient-gold">Our Vision</span></h3>
                 <p className="text-muted-foreground leading-relaxed">
                   To become the most trusted and innovative ticketing platform, 
                   redefining how people access events in a connected world.
@@ -267,7 +272,7 @@ const AboutUs = () => {
         <div className="container mx-auto text-center">
           <ScrollReveal animation="fade-up">
             <h2 className="text-3xl md:text-4xl font-bold mb-8">
-              🐝 <InteractiveText text="EntryHive Stands For" />
+              🐝 <InteractiveText text="EntryHive Stands For" className="text-gradient-gold" />
             </h2>
           </ScrollReveal>
           <ScrollReveal animation="scale" delay={150}>
@@ -275,7 +280,7 @@ const AboutUs = () => {
               {['Efficiency', 'Community', 'Trust', 'Innovation'].map((value, index) => (
                 <span 
                   key={value} 
-                  className="px-6 py-3 rounded-full bg-primary/10 text-primary font-semibold hover:bg-primary hover:text-primary-foreground transition-all duration-300 cursor-default hover:scale-110"
+                  className="px-6 py-3 rounded-full bg-primary/10 text-primary font-semibold hover:bg-primary hover:text-primary-foreground transition-all duration-300 cursor-default hover:scale-110 hover:shadow-lg click-shrink"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   {value}
