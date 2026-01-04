@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import AttendeeDetails from "./pages/AttendeeDetails";
 import CreateEvent from "./pages/CreateEvent";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import EventDetails from "./pages/EventDetails";
 import Checkout from "./pages/Checkout";
 import MyTickets from "./pages/MyTickets";
@@ -44,6 +45,7 @@ const App = () => (
                 <Route path="/events" element={<Events />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/events/:id" element={<EventDetails />} />
                 <Route path="/attendee-details" element={<AttendeeDetails />} />
                 <Route path="/checkout" element={<Checkout />} />

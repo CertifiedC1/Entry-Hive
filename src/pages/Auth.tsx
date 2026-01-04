@@ -25,6 +25,18 @@ const Auth = () => {
   const { signIn, signUp, user, loading } = useAuth();
   const navigate = useNavigate();
 
+  // Check for password reset token in URL
+  useEffect(() => {
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get('access_token');
+    const type = hashParams.get('type');
+    
+    if (accessToken && type === 'recovery') {
+      // Redirect to reset password page
+      navigate('/reset-password');
+    }
+  }, [navigate]);
+
   // Redirect if already logged in
   useEffect(() => {
     if (!loading && user) {
