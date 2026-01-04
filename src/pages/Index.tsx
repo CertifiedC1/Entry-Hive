@@ -132,11 +132,11 @@ const Index = () => {
       {/* Categories */}
       <section className="border-b bg-card py-6">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold mb-4">Popular Events</h2>
+          <h2 className="text-2xl font-bold mb-4 text-gradient-gold">Popular Events</h2>
           <div className="flex flex-wrap gap-2">
             <Badge
               variant={selectedCategory === null ? 'default' : 'outline'}
-              className="cursor-pointer transition-all duration-200 hover:scale-105"
+              className="cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-lg active:scale-95"
               onClick={() => setSelectedCategory(null)}
             >
               All
@@ -145,7 +145,7 @@ const Index = () => {
               <Badge
                 key={category.id}
                 variant={selectedCategory === category.id ? 'default' : 'outline'}
-                className="cursor-pointer transition-all duration-200 hover:scale-105"
+                className="cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-lg active:scale-95"
                 onClick={() => setSelectedCategory(category.id)}
               >
                 {category.icon} {category.name}
@@ -170,23 +170,28 @@ const Index = () => {
             </div>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {events.map((event) => (
-                <EventCard
-                  key={event.id}
-                  id={event.id}
-                  title={event.title}
-                  description={event.description}
-                  bannerUrl={event.banner_url || `https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&q=80`}
-                  venue={event.venue}
-                  location={event.location}
-                  eventDate={event.event_date}
-                  category={event.categories || undefined}
-                  minPrice={
-                    event.ticket_types.length > 0
-                      ? Math.min(...event.ticket_types.map((t) => Number(t.price)))
-                      : undefined
-                  }
-                />
+              {events.map((event, index) => (
+                <div 
+                  key={event.id} 
+                  className="animate-fade-in hover-lift"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <EventCard
+                    id={event.id}
+                    title={event.title}
+                    description={event.description}
+                    bannerUrl={event.banner_url || `https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&q=80`}
+                    venue={event.venue}
+                    location={event.location}
+                    eventDate={event.event_date}
+                    category={event.categories || undefined}
+                    minPrice={
+                      event.ticket_types.length > 0
+                        ? Math.min(...event.ticket_types.map((t) => Number(t.price)))
+                        : undefined
+                    }
+                  />
+                </div>
               ))}
             </div>
           )}

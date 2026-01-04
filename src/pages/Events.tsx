@@ -137,7 +137,7 @@ const Events = () => {
             </div>
           ) : (
             <div className="space-y-4 md:space-y-6">
-              {events.map((event) => {
+              {events.map((event, index) => {
                 const minPrice = getMinPrice(event.ticket_types);
                 const isClosed = isRegistrationClosed(event.ticket_types);
 
@@ -145,18 +145,19 @@ const Events = () => {
                   <Link
                     key={event.id}
                     to={`/events/${event.id}`}
-                    className="block"
+                    className="block animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <div className="flex flex-col md:flex-row gap-4 md:gap-6 p-4 border-b hover:bg-muted/30 transition-colors">
+                    <div className="flex flex-col md:flex-row gap-4 md:gap-6 p-4 border-b hover:bg-muted/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 active:scale-[0.99] rounded-lg">
                       {/* Event Image - Mobile First */}
-                      <div className="relative w-full md:w-72 h-48 md:h-40 flex-shrink-0 order-first md:order-last">
+                      <div className="relative w-full md:w-72 h-48 md:h-40 flex-shrink-0 order-first md:order-last overflow-hidden rounded-lg">
                         <img
                           src={event.banner_url || `https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&q=80`}
                           alt={event.title}
-                          className="w-full h-full object-cover rounded-lg"
+                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                         />
-                        <button className="absolute top-3 right-3 p-2 bg-white/90 rounded-full hover:bg-white transition-colors">
-                          <Heart className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground hover:text-red-500" />
+                        <button className="absolute top-3 right-3 p-2 bg-white/90 rounded-full hover:bg-white transition-all duration-200 hover:scale-110 active:scale-95">
+                          <Heart className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground hover:text-red-500 transition-colors" />
                         </button>
                       </div>
 
@@ -178,7 +179,7 @@ const Events = () => {
 
                         <div className="space-y-1">
                           {minPrice === 0 ? (
-                            <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
+                            <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs hover:scale-105 transition-transform">
                               FREE
                             </Badge>
                           ) : minPrice ? (
@@ -192,11 +193,11 @@ const Events = () => {
                           </p>
 
                           {isClosed ? (
-                            <Badge variant="destructive" className="text-xs">
+                            <Badge variant="destructive" className="text-xs hover:scale-105 transition-transform">
                               Registrations Closed
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="text-xs text-green-600 border-green-600">
+                            <Badge variant="outline" className="text-xs text-green-600 border-green-600 hover:scale-105 transition-transform">
                               Available
                             </Badge>
                           )}
