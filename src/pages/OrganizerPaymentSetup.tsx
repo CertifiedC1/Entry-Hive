@@ -7,18 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Smartphone, 
-  CreditCard, 
-  DollarSign, 
   CheckCircle, 
-  AlertCircle,
   Loader2,
-  Link as LinkIcon,
-  Percent
+  Percent,
+  User,
+  Phone
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -31,14 +27,8 @@ const OrganizerPaymentSetup = () => {
   const [saving, setSaving] = useState(false);
   const [organizerId, setOrganizerId] = useState<string | null>(null);
   const [paymentSettings, setPaymentSettings] = useState({
-    mpesa_shortcode: '',
-    mpesa_api_key: '',
-    mpesa_api_secret: '',
-    mpesa_passkey: '',
-    mpesa_callback_url: '',
-    paypal_email: '',
-    paypal_connected: false,
-    stripe_connected: false,
+    full_name: '',
+    mpesa_phone: '',
     payment_setup_complete: false
   });
 
@@ -66,9 +56,6 @@ const OrganizerPaymentSetup = () => {
 
       setOrganizerId(organizer.id);
       
-      // Generate callback URL
-      const callbackUrl = `${window.location.origin}/api/mpesa/callback/${organizer.id}`;
-      
       // Check for existing payment settings
       const { data: settings } = await supabase
         .from('organizer_payment_settings')
@@ -78,14 +65,10 @@ const OrganizerPaymentSetup = () => {
 
       if (settings) {
         setPaymentSettings({
-          ...settings,
-          mpesa_callback_url: callbackUrl
+          full_name: settings.mpesa_shortcode || '', // Repurposing field for full name
+          mpesa_phone: settings.mpesa_api_key || '', // Repurposing field for phone
+          payment_setup_complete: settings.payment_setup_complete || false
         });
-      } else {
-        setPaymentSettings(prev => ({
-          ...prev,
-          mpesa_callback_url: callbackUrl
-        }));
       }
     } catch (error) {
       console.error('Error checking organizer status:', error);
@@ -94,8 +77,28 @@ const OrganizerPaymentSetup = () => {
     }
   };
 
-  const handleSaveMpesaSettings = async () => {
+  const validatePhone = (phone: string): boolean => {
+    const phoneRegex = /^(\+254|0)?[17]\d{8}$/;
+    return phoneRegex.test(phone.replace(/\s/g, ''));
+  };
+
+  const handleSavePaymentSettings = async () => {
     if (!organizerId) return;
+
+    if (!paymentSettings.full_name.trim()) {
+      toast.error('Please enter your full name');
+      return;
+    }
+
+    if (!paymentSettings.mpesa_phone.trim()) {
+      toast.error('Please enter your MPESA phone number');
+      return;
+    }
+
+    if (!validatePhone(paymentSettings.mpesa_phone)) {
+      toast.error('Please enter a valid Kenyan phone number');
+      return;
+    }
     
     setSaving(true);
     try {
@@ -107,14 +110,9 @@ const OrganizerPaymentSetup = () => {
 
       const settingsData = {
         organizer_id: organizerId,
-        mpesa_shortcode: paymentSettings.mpesa_shortcode,
-        mpesa_api_key: paymentSettings.mpesa_api_key,
-        mpesa_api_secret: paymentSettings.mpesa_api_secret,
-        mpesa_passkey: paymentSettings.mpesa_passkey,
-        mpesa_callback_url: paymentSettings.mpesa_callback_url,
-        payment_setup_complete: paymentSettings.mpesa_shortcode !== '' || 
-                                paymentSettings.paypal_connected || 
-                                paymentSettings.stripe_connected
+        mpesa_shortcode: paymentSettings.full_name, // Store full name
+        mpesa_api_key: paymentSettings.mpesa_phone, // Store phone number
+        payment_setup_complete: true
       };
 
       if (existing) {
@@ -128,7 +126,7 @@ const OrganizerPaymentSetup = () => {
           .insert(settingsData);
       }
 
-      toast.success('MPESA settings saved successfully');
+      toast.success('Payment settings saved successfully');
       setPaymentSettings(prev => ({
         ...prev,
         payment_setup_complete: true
@@ -138,92 +136,6 @@ const OrganizerPaymentSetup = () => {
       toast.error('Failed to save settings');
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleConnectPayPal = async () => {
-    if (!organizerId) return;
-    
-    // Simulate PayPal connection
-    toast.info('PayPal connection simulated (Test Mode)');
-    
-    try {
-      const { data: existing } = await supabase
-        .from('organizer_payment_settings')
-        .select('id')
-        .eq('organizer_id', organizerId)
-        .single();
-
-      const updateData = {
-        organizer_id: organizerId,
-        paypal_connected: true,
-        paypal_email: 'connected@paypal.com',
-        payment_setup_complete: true
-      };
-
-      if (existing) {
-        await supabase
-          .from('organizer_payment_settings')
-          .update(updateData)
-          .eq('organizer_id', organizerId);
-      } else {
-        await supabase
-          .from('organizer_payment_settings')
-          .insert(updateData);
-      }
-
-      setPaymentSettings(prev => ({
-        ...prev,
-        paypal_connected: true,
-        paypal_email: 'connected@paypal.com',
-        payment_setup_complete: true
-      }));
-      
-      toast.success('PayPal account linked successfully (Test Mode)');
-    } catch (error) {
-      toast.error('Failed to connect PayPal');
-    }
-  };
-
-  const handleConnectStripe = async () => {
-    if (!organizerId) return;
-    
-    // Simulate Stripe connection
-    toast.info('Stripe connection simulated (Test Mode)');
-    
-    try {
-      const { data: existing } = await supabase
-        .from('organizer_payment_settings')
-        .select('id')
-        .eq('organizer_id', organizerId)
-        .single();
-
-      const updateData = {
-        organizer_id: organizerId,
-        stripe_connected: true,
-        payment_setup_complete: true
-      };
-
-      if (existing) {
-        await supabase
-          .from('organizer_payment_settings')
-          .update(updateData)
-          .eq('organizer_id', organizerId);
-      } else {
-        await supabase
-          .from('organizer_payment_settings')
-          .insert(updateData);
-      }
-
-      setPaymentSettings(prev => ({
-        ...prev,
-        stripe_connected: true,
-        payment_setup_complete: true
-      }));
-      
-      toast.success('Stripe account connected successfully (Test Mode)');
-    } catch (error) {
-      toast.error('Failed to connect Stripe');
     }
   };
 
@@ -259,151 +171,76 @@ const OrganizerPaymentSetup = () => {
         
         <div className="relative container mx-auto max-w-4xl px-4 py-8">
           <div className="mb-8 text-center">
-            <h1 className="text-4xl font-bold mb-2">Payment Setup</h1>
+            <h1 className="text-4xl font-bold mb-2 text-gradient-gold">Payment Setup</h1>
             <p className="text-muted-foreground">
-              Configure your payment methods to receive payouts from ticket sales
+              Configure your payment details to receive payouts from ticket sales
             </p>
           </div>
 
-          <Alert className="mb-6 border-amber-500/50 bg-amber-500/10">
-            <AlertCircle className="h-4 w-4 text-amber-500" />
-            <AlertDescription className="text-amber-500">
-              Payment integration is currently running in test mode. No real transactions will be processed until real API keys are added.
-            </AlertDescription>
-          </Alert>
-
           <div className="grid gap-6">
-            {/* MPESA Integration */}
-            <Card className="border">
+            {/* MPESA Payout Details */}
+            <Card className="border card-interactive">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Smartphone className="h-5 w-5 text-green-500" />
-                  MPESA Integration
+                  MPESA Payout Details
                 </CardTitle>
                 <CardDescription>
-                  Accept mobile money payments from your customers
+                  Enter your details for receiving payouts via MPESA (3 days after event)
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="shortcode">Business Shortcode</Label>
+                    <Label htmlFor="fullName" className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Full Name
+                    </Label>
                     <Input
-                      id="shortcode"
-                      placeholder="Enter shortcode (placeholder)"
-                      value={paymentSettings.mpesa_shortcode}
+                      id="fullName"
+                      placeholder="Enter your full name as registered on MPESA"
+                      value={paymentSettings.full_name}
                       onChange={(e) => setPaymentSettings(prev => ({
                         ...prev,
-                        mpesa_shortcode: e.target.value
+                        full_name: e.target.value
                       }))}
+                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="apiKey">MPESA API Key</Label>
+                    <Label htmlFor="mpesaPhone" className="flex items-center gap-2">
+                      <Phone className="h-4 w-4" />
+                      MPESA Phone Number
+                    </Label>
                     <Input
-                      id="apiKey"
-                      type="password"
-                      placeholder="Enter API key (placeholder)"
-                      value={paymentSettings.mpesa_api_key}
+                      id="mpesaPhone"
+                      type="tel"
+                      placeholder="e.g., 0712345678 or +254712345678"
+                      value={paymentSettings.mpesa_phone}
                       onChange={(e) => setPaymentSettings(prev => ({
                         ...prev,
-                        mpesa_api_key: e.target.value
+                        mpesa_phone: e.target.value
                       }))}
+                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/50"
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="apiSecret">MPESA API Secret</Label>
-                    <Input
-                      id="apiSecret"
-                      type="password"
-                      placeholder="Enter API secret (placeholder)"
-                      value={paymentSettings.mpesa_api_secret}
-                      onChange={(e) => setPaymentSettings(prev => ({
-                        ...prev,
-                        mpesa_api_secret: e.target.value
-                      }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="passkey">Passkey</Label>
-                    <Input
-                      id="passkey"
-                      type="password"
-                      placeholder="Enter passkey (placeholder)"
-                      value={paymentSettings.mpesa_passkey}
-                      onChange={(e) => setPaymentSettings(prev => ({
-                        ...prev,
-                        mpesa_passkey: e.target.value
-                      }))}
-                    />
+                    <p className="text-xs text-muted-foreground">
+                      This number will be used to send your earnings after each event
+                    </p>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="callback">Callback URL (Auto-generated)</Label>
-                  <Input
-                    id="callback"
-                    value={paymentSettings.mpesa_callback_url}
-                    readOnly
-                    className="bg-muted"
-                  />
-                </div>
-                <Button onClick={handleSaveMpesaSettings} disabled={saving}>
+                <Button 
+                  onClick={handleSavePaymentSettings} 
+                  disabled={saving}
+                  className="hover-lift"
+                >
                   {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                  Save MPESA Settings
+                  Save Payment Details
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Alternative Payment Methods */}
-            <Card className="border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-blue-500" />
-                  Alternative Payment Methods
-                </CardTitle>
-                <CardDescription>
-                  Connect additional payment gateways
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex flex-wrap gap-4">
-                  <Button 
-                    variant={paymentSettings.paypal_connected ? "default" : "outline"}
-                    onClick={handleConnectPayPal}
-                    className="flex items-center gap-2"
-                  >
-                    {paymentSettings.paypal_connected ? (
-                      <CheckCircle className="h-4 w-4" />
-                    ) : (
-                      <LinkIcon className="h-4 w-4" />
-                    )}
-                    {paymentSettings.paypal_connected ? 'PayPal Connected' : 'Link PayPal Account'}
-                  </Button>
-                  
-                  <Button 
-                    variant={paymentSettings.stripe_connected ? "default" : "outline"}
-                    onClick={handleConnectStripe}
-                    className="flex items-center gap-2"
-                  >
-                    {paymentSettings.stripe_connected ? (
-                      <CheckCircle className="h-4 w-4" />
-                    ) : (
-                      <LinkIcon className="h-4 w-4" />
-                    )}
-                    {paymentSettings.stripe_connected ? 'Stripe Connected' : 'Connect Stripe'}
-                  </Button>
-                </div>
-                
-                {(paymentSettings.paypal_connected || paymentSettings.stripe_connected) && (
-                  <p className="text-sm text-muted-foreground">
-                    Connected accounts are in test mode. Transactions will be simulated.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-
             {/* Commission Display */}
-            <Card className="border">
+            <Card className="border card-interactive">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Percent className="h-5 w-5 text-primary" />
@@ -423,21 +260,21 @@ const OrganizerPaymentSetup = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr className="border-b">
+                      <tr className="border-b hover:bg-muted/50 transition-colors">
                         <td className="py-3 px-4">Platform Commission</td>
                         <td className="py-3 px-4 text-right">
                           <Badge variant="secondary">10%</Badge>
                         </td>
                       </tr>
-                      <tr className="border-b">
+                      <tr className="border-b hover:bg-muted/50 transition-colors">
                         <td className="py-3 px-4">Your Payout (per sale)</td>
                         <td className="py-3 px-4 text-right text-green-600 font-semibold">90%</td>
                       </tr>
-                      <tr className="border-b">
+                      <tr className="border-b hover:bg-muted/50 transition-colors">
                         <td className="py-3 px-4">Payment Gateway Fees</td>
                         <td className="py-3 px-4 text-right text-muted-foreground">Included in commission</td>
                       </tr>
-                      <tr>
+                      <tr className="hover:bg-muted/50 transition-colors">
                         <td className="py-3 px-4">Payout Schedule</td>
                         <td className="py-3 px-4 text-right text-muted-foreground">3 days after event</td>
                       </tr>
@@ -464,7 +301,7 @@ const OrganizerPaymentSetup = () => {
                 size="lg" 
                 onClick={handleContinueToCreateEvent}
                 disabled={!paymentSettings.payment_setup_complete}
-                className="min-w-[200px]"
+                className="min-w-[200px] hover-lift"
               >
                 {paymentSettings.payment_setup_complete ? (
                   <>

@@ -58,24 +58,39 @@ serve(async (req) => {
       minute: '2-digit'
     });
 
-    const ticketRows = tickets.map((ticket, index) => `
-      <tr>
-        <td style="padding: 15px; border-bottom: 1px solid #e0e0e0;">
-          <div style="display: flex; align-items: center; gap: 15px;">
-            <div style="background: linear-gradient(135deg, #d4a017, #f4c542); color: #1a1a1a; padding: 8px 15px; border-radius: 5px; font-weight: bold;">
-              TICKET ${index + 1}
-            </div>
-            <div>
-              <p style="margin: 0; font-weight: 600; color: #333;">${ticket.ticket_type}</p>
-              <p style="margin: 5px 0 0 0; font-size: 12px; color: #666; font-family: monospace;">${ticket.ticket_number}</p>
-            </div>
-          </div>
-        </td>
-        <td style="padding: 15px; border-bottom: 1px solid #e0e0e0; text-align: right;">
-          <p style="margin: 0; font-weight: 600; color: #d4a017;">KES ${ticket.price.toLocaleString()}</p>
-        </td>
-      </tr>
-    `).join('');
+    // Generate QR code URL using a public QR code API
+    const generateQRCodeUrl = (data: string) => {
+      const encodedData = encodeURIComponent(data);
+      return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodedData}`;
+    };
+
+    const ticketRows = tickets.map((ticket, index) => {
+      const qrCodeUrl = generateQRCodeUrl(ticket.qr_code);
+      return `
+        <tr>
+          <td style="padding: 20px; border-bottom: 1px solid #e0e0e0;">
+            <table style="width: 100%;">
+              <tr>
+                <td style="vertical-align: top; width: 60%;">
+                  <div style="background: linear-gradient(135deg, #d4a017, #f4c542); color: #1a1a1a; padding: 8px 15px; border-radius: 5px; font-weight: bold; display: inline-block; margin-bottom: 10px;">
+                    TICKET ${index + 1}
+                  </div>
+                  <p style="margin: 10px 0 5px 0; font-weight: 600; color: #333; font-size: 16px;">${ticket.ticket_type}</p>
+                  <p style="margin: 5px 0; font-size: 12px; color: #666; font-family: monospace;">${ticket.ticket_number}</p>
+                  <p style="margin: 10px 0 0 0; font-weight: 600; color: #d4a017; font-size: 18px;">KES ${ticket.price.toLocaleString()}</p>
+                </td>
+                <td style="vertical-align: top; text-align: right; width: 40%;">
+                  <div style="background: #fff; padding: 10px; border-radius: 10px; display: inline-block; border: 2px solid #d4a017;">
+                    <img src="${qrCodeUrl}" alt="QR Code" style="width: 150px; height: 150px; display: block;" />
+                    <p style="margin: 8px 0 0 0; font-size: 10px; color: #666; text-align: center;">Scan at entry</p>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      `;
+    }).join('');
 
     const emailHtml = `
       <!DOCTYPE html>
