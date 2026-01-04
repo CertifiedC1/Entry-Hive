@@ -9,10 +9,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2, Upload, Image, X } from 'lucide-react';
+import { Loader2, Plus, Trash2, Upload, Image, X, Search, Globe } from 'lucide-react';
 
 interface TicketType {
   name: string;
@@ -20,6 +21,22 @@ interface TicketType {
   price: number;
   quantity_available: number;
 }
+
+// Curated Unsplash event images for quick selection
+const UNSPLASH_EVENT_IMAGES = [
+  { url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80', label: 'Conference' },
+  { url: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&q=80', label: 'Concert' },
+  { url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80', label: 'Party' },
+  { url: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80', label: 'Festival' },
+  { url: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80', label: 'Stage' },
+  { url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80', label: 'Crowd' },
+  { url: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&q=80', label: 'Music' },
+  { url: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&q=80', label: 'Wedding' },
+  { url: 'https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=800&q=80', label: 'Sports' },
+  { url: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=800&q=80', label: 'Speaker' },
+  { url: 'https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=800&q=80', label: 'Exhibition' },
+  { url: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&q=80', label: 'Outdoor' },
+];
 
 const CreateEvent = () => {
   const { user } = useAuth();
@@ -31,6 +48,8 @@ const CreateEvent = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [selectedUnsplashUrl, setSelectedUnsplashUrl] = useState<string | null>(null);
+  const [bannerSource, setBannerSource] = useState<'upload' | 'unsplash'>('upload');
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
     { name: 'General', description: '', price: 0, quantity_available: 100 },
   ]);
@@ -103,6 +122,7 @@ const CreateEvent = () => {
 
   const removeBanner = () => {
     setBannerFile(null);
+    setSelectedUnsplashUrl(null);
     if (bannerPreview) {
       URL.revokeObjectURL(bannerPreview);
     }
@@ -110,6 +130,13 @@ const CreateEvent = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  const selectUnsplashImage = (url: string) => {
+    setSelectedUnsplashUrl(url);
+    setBannerPreview(url);
+    setBannerFile(null);
+    setBannerSource('unsplash');
   };
 
   const uploadBanner = async (): Promise<string | null> => {
@@ -169,10 +196,12 @@ const CreateEvent = () => {
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
     try {
-      // Upload banner if exists
+      // Get banner URL - either from upload or Unsplash
       let bannerUrl: string | null = null;
       if (bannerFile) {
         bannerUrl = await uploadBanner();
+      } else if (selectedUnsplashUrl) {
+        bannerUrl = selectedUnsplashUrl;
       }
 
       // Create event
@@ -253,63 +282,127 @@ const CreateEvent = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Event Banner Upload */}
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <Label>Event Banner Image</Label>
-                <div className="flex flex-col gap-4">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
+                
+                <Tabs value={bannerSource} onValueChange={(v) => setBannerSource(v as 'upload' | 'unsplash')}>
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="upload" className="flex items-center gap-2">
+                      <Upload className="h-4 w-4" />
+                      Upload Image
+                    </TabsTrigger>
+                    <TabsTrigger value="unsplash" className="flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      Use Unsplash
+                    </TabsTrigger>
+                  </TabsList>
                   
-                  {bannerPreview ? (
-                    <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted">
-                      <img
-                        src={bannerPreview}
-                        alt="Event banner preview"
-                        className="h-full w-full object-cover"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2"
-                        onClick={removeBanner}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div 
-                      className="aspect-video w-full rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center bg-muted/50 cursor-pointer hover:bg-muted/70 transition-colors"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <div className="text-center p-4">
-                        <Upload className="h-8 w-8 md:h-10 md:w-10 mx-auto text-muted-foreground mb-2" />
-                        <p className="text-sm text-muted-foreground font-medium">
-                          Click to upload banner image
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          PNG, JPG up to 5MB
-                        </p>
+                  <TabsContent value="upload" className="space-y-4 mt-4">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                    
+                    {bannerPreview && bannerSource === 'upload' ? (
+                      <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted">
+                        <img
+                          src={bannerPreview}
+                          alt="Event banner preview"
+                          className="h-full w-full object-cover"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={removeBanner}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <div 
+                        className="aspect-video w-full rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center bg-muted/50 cursor-pointer hover:bg-muted/70 transition-colors"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <div className="text-center p-4">
+                          <Upload className="h-8 w-8 md:h-10 md:w-10 mx-auto text-muted-foreground mb-2" />
+                          <p className="text-sm text-muted-foreground font-medium">
+                            Click to upload banner image
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            PNG, JPG up to 5MB
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
-                  {!bannerPreview && (
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-full md:w-auto"
-                    >
-                      <Image className="mr-2 h-4 w-4" />
-                      Browse Files
-                    </Button>
-                  )}
-                </div>
+                    {!bannerPreview && bannerSource === 'upload' && (
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full md:w-auto"
+                      >
+                        <Image className="mr-2 h-4 w-4" />
+                        Browse Files
+                      </Button>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="unsplash" className="space-y-4 mt-4">
+                    <p className="text-sm text-muted-foreground">
+                      Select a professional event image from Unsplash
+                    </p>
+                    
+                    {selectedUnsplashUrl && bannerSource === 'unsplash' && (
+                      <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted mb-4">
+                        <img
+                          src={selectedUnsplashUrl}
+                          alt="Selected Unsplash image"
+                          className="h-full w-full object-cover"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={removeBanner}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                        <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                          ✓ Selected
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                      {UNSPLASH_EVENT_IMAGES.map((img, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => selectUnsplashImage(img.url)}
+                          className={`relative aspect-video overflow-hidden rounded-lg border-2 transition-all hover:border-primary ${
+                            selectedUnsplashUrl === img.url ? 'border-primary ring-2 ring-primary/50' : 'border-transparent'
+                          }`}
+                        >
+                          <img
+                            src={img.url}
+                            alt={img.label}
+                            className="h-full w-full object-cover hover:scale-110 transition-transform duration-300"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1 text-center">
+                            {img.label}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4 md:gap-6">

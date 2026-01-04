@@ -70,6 +70,14 @@ export const Navigation = () => {
     { path: '/contact', label: 'Contact Us' },
   ];
 
+  // Golden nav link styles
+  const getNavLinkClass = (isActiveLink: boolean) => {
+    const baseClass = "text-primary font-medium transition-all duration-300 hover:text-primary hover:drop-shadow-[0_0_8px_hsl(43,74%,49%)]";
+    return isActiveLink 
+      ? `${baseClass} drop-shadow-[0_0_10px_hsl(43,74%,49%)]` 
+      : baseClass;
+  };
+
   return (
     <nav className="border-b bg-card sticky top-0 z-50 backdrop-blur-sm bg-card/95">
       <div className="container mx-auto px-4">
@@ -86,7 +94,7 @@ export const Navigation = () => {
                 <Link key={link.path} to={link.path}>
                   <Button 
                     variant="ghost" 
-                    className={isActive(link.path) ? 'text-primary' : ''}
+                    className={getNavLinkClass(isActive(link.path))}
                   >
                     {link.label}
                   </Button>
@@ -98,7 +106,7 @@ export const Navigation = () => {
                 <Link to="/organizer-dashboard">
                   <Button 
                     variant="ghost"
-                    className={isActive('/organizer-dashboard') ? 'text-primary' : ''}
+                    className={getNavLinkClass(isActive('/organizer-dashboard'))}
                   >
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     Dashboard
@@ -140,27 +148,27 @@ export const Navigation = () => {
                   <DropdownMenuSeparator />
                   {isOrganizer && (
                     <DropdownMenuItem asChild>
-                      <Link to="/organizer-dashboard" className="w-full cursor-pointer">
+                      <Link to="/organizer-dashboard" className="w-full cursor-pointer text-primary">
                         <LayoutDashboard className="mr-2 h-4 w-4" />
                         Dashboard
                       </Link>
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem asChild>
-                    <Link to="/profile" className="w-full cursor-pointer">
+                    <Link to="/profile" className="w-full cursor-pointer text-primary">
                       <User className="mr-2 h-4 w-4" />
                       Profile
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/my-tickets" className="w-full cursor-pointer">
+                    <Link to="/my-tickets" className="w-full cursor-pointer text-primary">
                       <Ticket className="mr-2 h-4 w-4" />
                       My Tickets
                     </Link>
                   </DropdownMenuItem>
                   {isAdmin && (
                     <DropdownMenuItem asChild>
-                      <Link to="/admin-dashboard" className="w-full cursor-pointer">
+                      <Link to="/admin-dashboard" className="w-full cursor-pointer text-primary">
                         Admin Panel
                       </Link>
                     </DropdownMenuItem>
@@ -202,7 +210,7 @@ export const Navigation = () => {
                 >
                   <Button 
                     variant="ghost" 
-                    className={`w-full justify-start ${isActive(link.path) ? 'text-primary' : ''}`}
+                    className={`w-full justify-start ${getNavLinkClass(isActive(link.path))}`}
                   >
                     {link.label}
                   </Button>
@@ -213,7 +221,7 @@ export const Navigation = () => {
                 <Link to="/organizer-dashboard" onClick={() => setMobileMenuOpen(false)}>
                   <Button 
                     variant="ghost"
-                    className={`w-full justify-start ${isActive('/organizer-dashboard') ? 'text-primary' : ''}`}
+                    className={`w-full justify-start ${getNavLinkClass(isActive('/organizer-dashboard'))}`}
                   >
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     Dashboard
@@ -224,13 +232,13 @@ export const Navigation = () => {
               {user && (
                 <>
                   <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start">
+                    <Button variant="ghost" className={`w-full justify-start ${getNavLinkClass(isActive('/profile'))}`}>
                       <User className="mr-2 h-4 w-4" />
                       Profile
                     </Button>
                   </Link>
                   <Link to="/my-tickets" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start">
+                    <Button variant="ghost" className={`w-full justify-start ${getNavLinkClass(isActive('/my-tickets'))}`}>
                       <Ticket className="mr-2 h-4 w-4" />
                       My Tickets
                     </Button>

@@ -20,6 +20,21 @@ interface EventCardProps {
   minPrice?: number;
 }
 
+// Default fallback images for events without banners
+const FALLBACK_EVENT_IMAGES = [
+  'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
+  'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&q=80',
+  'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80',
+  'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80',
+  'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80',
+];
+
+// Get consistent fallback image based on event ID
+const getFallbackImage = (id: string) => {
+  const index = id.charCodeAt(0) % FALLBACK_EVENT_IMAGES.length;
+  return FALLBACK_EVENT_IMAGES[index];
+};
+
 export const EventCard = ({
   id,
   title,
@@ -31,20 +46,20 @@ export const EventCard = ({
   category,
   minPrice,
 }: EventCardProps) => {
+  const imageUrl = bannerUrl || getFallbackImage(id);
+
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2 active:scale-[0.98] card-interactive group">
       <div className="aspect-video w-full overflow-hidden bg-muted">
-        {bannerUrl ? (
-          <img
-            src={bannerUrl}
-            alt={title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <Ticket className="h-16 w-16 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />
-          </div>
-        )}
+        <img
+          src={imageUrl}
+          alt={title}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          onError={(e) => {
+            // Fallback if image fails to load
+            (e.target as HTMLImageElement).src = getFallbackImage(id);
+          }}
+        />
       </div>
       
       <CardHeader>
