@@ -70,11 +70,11 @@ export const Navigation = () => {
     { path: '/contact', label: 'Contact Us' },
   ];
 
-  // Golden nav link styles - text always visible with glow on hover
+  // Golden nav link styles - black text with golden glow on hover
   const getNavLinkClass = (isActiveLink: boolean) => {
-    const baseClass = "!text-primary font-medium transition-all duration-300 hover:!text-primary hover:drop-shadow-[0_0_12px_hsl(43,74%,60%)] hover:brightness-125";
+    const baseClass = "!text-foreground font-medium transition-all duration-300 hover:!text-primary hover:drop-shadow-[0_0_12px_hsl(43,74%,60%)]";
     return isActiveLink 
-      ? `${baseClass} drop-shadow-[0_0_10px_hsl(43,74%,60%)] brightness-110` 
+      ? `${baseClass} !text-primary drop-shadow-[0_0_10px_hsl(43,74%,60%)]` 
       : baseClass;
   };
 
