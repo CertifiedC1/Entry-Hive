@@ -99,13 +99,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
+      // If the local session is already gone (common after refresh/expiry), Supabase can throw
+      // "Auth session missing". Treat that as already-signed-out.
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
+      if (error && !String(error.message || '').toLowerCase().includes('auth session missing')) {
+        throw error;
+      }
+
       toast.success('Signed out successfully');
       navigate('/auth');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to sign out');
+      toast.error(error?.message || 'Failed to sign out');
       throw error;
     }
   };
