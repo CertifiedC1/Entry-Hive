@@ -126,19 +126,18 @@ serve(async (req) => {
       throw new Error('No authorization header');
     }
 
-    // Create client with user's auth token for proper authentication
-    const userSupabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user }, error: userError } = await userSupabaseClient.auth.getUser();
+    // Extract JWT token and verify using admin client
+    const token = authHeader.replace('Bearer ', '');
+    
+    // Verify the JWT and get user info using service role client
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
 
     if (userError || !user) {
       console.error('Auth error:', userError);
       throw new Error('Unauthorized');
     }
+
+    console.log('Authenticated user:', user.id);
 
     const rawData = await req.json();
     const paymentData = validatePaymentRequest(rawData);
