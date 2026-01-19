@@ -435,6 +435,16 @@ const Auth = () => {
                 >
                   {isLoading ? 'Creating account...' : 'Create Account'}
                 </Button>
+                <div className="text-center mt-4">
+                  <Button 
+                    type="button" 
+                    variant="link" 
+                    className="px-0 text-primary hover:text-primary/80"
+                    onClick={() => setShowForgotPassword(true)}
+                  >
+                    Already have an account? Forgot Password?
+                  </Button>
+                </div>
               </form>
             </TabsContent>
           </Tabs>
