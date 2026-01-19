@@ -13,6 +13,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateSplit } from '@/services/paymentProcessor';
 
+const STORAGE_KEY = 'entryhive_checkout_state';
+
 interface CheckoutState {
   eventId: string;
   eventTitle?: string;
@@ -43,24 +45,49 @@ const Checkout = () => {
     email: '',
     phone: ''
   });
-  
-  const state = location.state as CheckoutState;
-  const { platformFee, organizerPayout } = state ? calculateSplit(state.totalAmount) : { platformFee: 0, organizerPayout: 0 };
+  const [stateData, setStateData] = useState<CheckoutState | null>(null);
 
+  // Load state from location.state or sessionStorage
   useEffect(() => {
-    if (!user || !state) {
+    const locState = location.state as CheckoutState | undefined;
+    if (locState?.eventId && locState?.selectedTickets && locState?.attendeeInfo) {
+      // Save to sessionStorage for refresh safety
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(locState));
+      setStateData(locState);
+      setCustomerInfo(locState.attendeeInfo);
+    } else {
+      // Try to restore from sessionStorage
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored) as CheckoutState;
+          if (parsed.eventId && parsed.selectedTickets && parsed.attendeeInfo) {
+            setStateData(parsed);
+            setCustomerInfo(parsed.attendeeInfo);
+            return;
+          }
+        } catch (e) {
+          console.error('Failed to parse stored checkout state:', e);
+        }
+      }
+      // No valid state - redirect to home
       navigate('/');
-      return;
     }
-    
-    if (state.attendeeInfo) {
-      setCustomerInfo(state.attendeeInfo);
+  }, [location.state, navigate]);
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!user && stateData) {
+      toast.error('Please sign in to complete your purchase');
+      navigate('/auth');
     }
-  }, [user, state, navigate]);
+  }, [user, stateData, navigate]);
+
+  const { platformFee, organizerPayout } = stateData ? calculateSplit(stateData.totalAmount) : { platformFee: 0, organizerPayout: 0 };
 
   // Poll for payment status
   const checkPaymentStatus = useCallback(async () => {
-    if (!paymentId) return;
+    if (!paymentId || !stateData) return;
 
     try {
       const { data: payment, error } = await supabase
@@ -77,6 +104,10 @@ const Checkout = () => {
       if (payment?.payment_status === 'completed') {
         setPaymentStatus('success');
         toast.success('Payment successful! Redirecting to your tickets...');
+        
+        // Clear sessionStorage on success
+        sessionStorage.removeItem(STORAGE_KEY);
+        sessionStorage.removeItem('entryhive_attendee_state');
         
         // Fetch ticket details with ticket type info
         const { data: tickets } = await supabase
@@ -104,11 +135,11 @@ const Checkout = () => {
                 ticket_type: (t.ticket_types as any)?.name || 'Standard',
                 price: (t.ticket_types as any)?.price || 0
               })) || [],
-              eventTitle: state.eventTitle || 'Event',
-              eventDate: state.eventDate || new Date().toISOString(),
-              eventVenue: state.eventVenue || '',
-              eventLocation: state.eventLocation || '',
-              totalAmount: state.totalAmount,
+              eventTitle: stateData.eventTitle || 'Event',
+              eventDate: stateData.eventDate || new Date().toISOString(),
+              eventVenue: stateData.eventVenue || '',
+              eventLocation: stateData.eventLocation || '',
+              totalAmount: stateData.totalAmount,
               transactionId: payment.transaction_id || paymentId
             }
           });
@@ -135,7 +166,7 @@ const Checkout = () => {
     } catch (error) {
       console.error('Payment status check error:', error);
     }
-  }, [paymentId, navigate, state]);
+  }, [paymentId, navigate, stateData, customerInfo]);
 
   // Polling effect
   useEffect(() => {
@@ -153,7 +184,7 @@ const Checkout = () => {
     return () => clearTimeout(timer);
   }, [paymentStatus, pollingCount, checkPaymentStatus]);
 
-  if (!state) {
+  if (!stateData) {
     return null;
   }
 
@@ -175,13 +206,13 @@ const Checkout = () => {
     try {
       const { data, error } = await supabase.functions.invoke('process-payment', {
         body: {
-          eventId: state.eventId,
-          tickets: Object.entries(state.selectedTickets)
+          eventId: stateData.eventId,
+          tickets: Object.entries(stateData.selectedTickets)
             .filter(([_, qty]) => qty > 0)
             .map(([ticketTypeId, quantity]) => ({ ticketTypeId, quantity })),
           paymentMethod: 'mpesa',
           customerInfo: customerInfo,
-          totalAmount: state.totalAmount
+          totalAmount: stateData.totalAmount
         }
       });
 
@@ -315,12 +346,12 @@ const Checkout = () => {
                 <CardTitle>Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {state.eventTitle && (
+                {stateData.eventTitle && (
                   <div className="pb-4 border-b">
-                    <p className="font-semibold">{state.eventTitle}</p>
-                    {state.eventDate && (
+                    <p className="font-semibold">{stateData.eventTitle}</p>
+                    {stateData.eventDate && (
                       <p className="text-sm text-muted-foreground">
-                        {new Date(state.eventDate).toLocaleDateString('en-US', {
+                        {new Date(stateData.eventDate).toLocaleDateString('en-US', {
                           weekday: 'short',
                           year: 'numeric',
                           month: 'short',
@@ -332,10 +363,10 @@ const Checkout = () => {
                 )}
                 
                 <div className="space-y-2">
-                  {state.ticketDetails && Object.entries(state.selectedTickets)
+                  {stateData.ticketDetails && Object.entries(stateData.selectedTickets)
                     .filter(([_, qty]) => qty > 0)
                     .map(([ticketId, qty]) => {
-                      const ticket = state.ticketDetails?.[ticketId];
+                      const ticket = stateData.ticketDetails?.[ticketId];
                       return ticket ? (
                         <div key={ticketId} className="flex justify-between text-sm">
                           <span>{ticket.name} x{qty}</span>
@@ -348,7 +379,7 @@ const Checkout = () => {
                   
                   <div className="flex justify-between text-sm">
                     <span>Subtotal:</span>
-                    <span>KES {state.totalAmount.toLocaleString()}</span>
+                    <span>KES {stateData.totalAmount.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Taxes:</span>
@@ -357,7 +388,7 @@ const Checkout = () => {
                   <Separator />
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total:</span>
-                    <span className="text-primary">KES {state.totalAmount.toLocaleString()}</span>
+                    <span className="text-primary">KES {stateData.totalAmount.toLocaleString()}</span>
                   </div>
                 </div>
 
