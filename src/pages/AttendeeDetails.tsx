@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
@@ -12,22 +12,62 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
+const STORAGE_KEY = 'entryhive_attendee_state';
+
+interface AttendeeState {
+  eventId: string;
+  selectedTickets: Record<string, number>;
+  totalAmount: number;
+  ticketDetails?: Record<string, { name: string; price: number }>;
+  eventTitle?: string;
+  eventDate?: string;
+  eventVenue?: string;
+  eventLocation?: string;
+}
+
 const AttendeeDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { eventId, selectedTickets, totalAmount } = location.state || {};
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [stateData, setStateData] = useState<AttendeeState | null>(null);
 
-  if (!eventId || !selectedTickets) {
-    navigate('/');
-    return null;
-  }
+  // Load state from location.state or sessionStorage
+  useEffect(() => {
+    const locState = location.state as AttendeeState | undefined;
+    if (locState?.eventId && locState?.selectedTickets) {
+      // Save to sessionStorage for refresh safety
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(locState));
+      setStateData(locState);
+    } else {
+      // Try to restore from sessionStorage
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored) as AttendeeState;
+          if (parsed.eventId && parsed.selectedTickets) {
+            setStateData(parsed);
+            return;
+          }
+        } catch (e) {
+          console.error('Failed to parse stored attendee state:', e);
+        }
+      }
+      // No valid state - redirect to home
+      navigate('/');
+    }
+  }, [location.state, navigate]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (!acceptedTerms) {
       toast.error('Please accept the terms and conditions');
+      return;
+    }
+
+    if (!stateData) {
+      toast.error('Session expired. Please start again.');
+      navigate('/');
       return;
     }
 
@@ -41,13 +81,15 @@ const AttendeeDetails = () => {
     // Navigate to checkout with attendee info
     navigate('/checkout', {
       state: {
-        eventId,
-        selectedTickets,
-        totalAmount,
+        ...stateData,
         attendeeInfo,
       },
     });
   };
+
+  if (!stateData) {
+    return null;
+  }
 
   return (
     <div 

@@ -3,7 +3,7 @@ import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 
 const TIMEOUT_DURATION = 20 * 60 * 1000; // 20 minutes in milliseconds
-const WARNING_BEFORE = 2 * 60 * 1000; // 2 minutes before timeout
+const WARNING_BEFORE = 5 * 60 * 1000; // 5 minutes before timeout
 
 export const useSessionTimeout = () => {
   const { user, signOut } = useAuth();

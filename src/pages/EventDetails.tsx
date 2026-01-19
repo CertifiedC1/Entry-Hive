@@ -127,12 +127,23 @@ const EventDetails = () => {
       return;
     }
 
-    // Navigate to attendee details page
+    // Build ticket details map for checkout display
+    const ticketDetails: Record<string, { name: string; price: number }> = {};
+    ticketTypes.forEach((tt) => {
+      ticketDetails[tt.id] = { name: tt.name, price: tt.price };
+    });
+
+    // Navigate to attendee details page with all required info
     navigate('/attendee-details', {
       state: {
         eventId: id,
         selectedTickets,
         totalAmount: getTotalAmount(),
+        ticketDetails,
+        eventTitle: event?.title,
+        eventDate: event?.event_date,
+        eventVenue: event?.venue,
+        eventLocation: event?.location,
       },
     });
   };
