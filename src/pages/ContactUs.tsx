@@ -9,6 +9,7 @@ import { MapPin, Phone, Mail, Send, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollReveal } from '@/hooks/useScrollAnimation';
+import { supabase } from '@/integrations/supabase/client';
 import contactImage from '@/assets/contact-ticketing.jpg';
 
 const ContactUs = () => {
@@ -108,39 +109,23 @@ const ContactUs = () => {
     setIsSubmitting(true);
 
     try {
-      // Build email content with all form details
-      const emailContent = `
-New Contact Form Submission from EntryHive
-
-From: ${formData.name}
-Email: ${formData.email}
-Phone: ${formData.phone}
-Company: ${formData.company || 'Not provided'}
-
-Subject: ${formData.subject}
-
-Message:
-${formData.question || 'No message provided'}
-      `.trim();
-
-      const response = await fetch('https://www.fixafrica.co.ke/carenthusiast/api/email/email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // Call the edge function to send email (bypasses CORS)
+      const { data, error } = await supabase.functions.invoke('send-contact-email', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          company: formData.company,
+          subject: formData.subject,
+          message: formData.question,
         },
-        body: JSON.stringify({
-          subject: `EntryHive Contact: ${formData.subject}`,
-          content: emailContent,
-          recipient: 'ndungueliud2021@gmail.com',
-          from_name: 'EntryHive Contact Form',
-          reply_to: formData.email,
-          reply_name: formData.name,
-        }),
       });
 
-      const result = await response.json();
+      if (error) {
+        throw error;
+      }
 
-      if (result.success) {
+      if (data?.success) {
         toast({
           title: 'Message Sent Successfully!',
           description: 'Thank you for contacting us. We\'ll get back to you soon.',
@@ -156,7 +141,7 @@ ${formData.question || 'No message provided'}
         setNameError('');
         setPhoneError('');
       } else {
-        throw new Error(result.message || 'Failed to send message');
+        throw new Error(data?.message || 'Failed to send message');
       }
     } catch (error) {
       console.error('Email send error:', error);
