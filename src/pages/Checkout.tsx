@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateSplit } from '@/services/paymentProcessor';
+import { checkRateLimit } from '@/lib/rate-limiter';
 
 const STORAGE_KEY = 'entryhive_checkout_state';
 
@@ -197,6 +198,13 @@ const Checkout = () => {
 
     if (!customerInfo.name || !customerInfo.email || !customerInfo.phone) {
       toast.error('Please provide your name, email, and phone number');
+      return;
+    }
+
+    // Rate limiting check for payments
+    const rateCheck = checkRateLimit('payment');
+    if (!rateCheck.allowed) {
+      toast.error(`Too many payment attempts. Please wait ${rateCheck.retryAfter} seconds.`);
       return;
     }
 

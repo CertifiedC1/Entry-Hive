@@ -111,6 +111,13 @@ export type Database = {
             referencedRelation: "organizers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "events_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "organizers_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       notifications: {
@@ -198,6 +205,13 @@ export type Database = {
             columns: ["organizer_id"]
             isOneToOne: true
             referencedRelation: "organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizer_payment_settings_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: true
+            referencedRelation: "organizers_public"
             referencedColumns: ["id"]
           },
         ]
@@ -347,6 +361,13 @@ export type Database = {
             columns: ["organizer_id"]
             isOneToOne: false
             referencedRelation: "organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "organizers_public"
             referencedColumns: ["id"]
           },
           {
@@ -590,7 +611,36 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      organizers_public: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string | null
+          logo_url: string | null
+          organization_name: string | null
+          verified: boolean | null
+          website_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          logo_url?: string | null
+          organization_name?: string | null
+          verified?: boolean | null
+          website_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          logo_url?: string | null
+          organization_name?: string | null
+          verified?: boolean | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
@@ -603,6 +653,10 @@ export type Database = {
       increment_ticket_sold: {
         Args: { quantity: number; ticket_type_id: string }
         Returns: undefined
+      }
+      is_event_organizer_for_attendee: {
+        Args: { profile_user_id: string }
+        Returns: boolean
       }
     }
     Enums: {
