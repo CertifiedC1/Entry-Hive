@@ -7,10 +7,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowLeft, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { EntryHiveLogo } from '@/components/EntryHiveLogo';
 import { supabase } from '@/integrations/supabase/client';
+import { checkRateLimit, resetRateLimit } from '@/lib/rate-limiter';
+import { validatePasswordStrength } from '@/lib/security-utils';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -112,6 +114,14 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Rate limiting check
+    const rateCheck = checkRateLimit('auth');
+    if (!rateCheck.allowed) {
+      toast.error(`Too many login attempts. Please wait ${rateCheck.retryAfter} seconds.`);
+      return;
+    }
+
     setIsLoading(true);
     
     const formData = new FormData(e.currentTarget);
@@ -120,6 +130,7 @@ const Auth = () => {
 
     try {
       await signIn(email, password);
+      resetRateLimit('auth'); // Reset on successful login
     } catch (error) {
       console.error('Sign in error:', error);
     } finally {
@@ -129,6 +140,14 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Rate limiting check
+    const rateCheck = checkRateLimit('auth');
+    if (!rateCheck.allowed) {
+      toast.error(`Too many attempts. Please wait ${rateCheck.retryAfter} seconds.`);
+      return;
+    }
+
     setIsLoading(true);
     
     const formData = new FormData(e.currentTarget);
@@ -148,6 +167,14 @@ const Auth = () => {
       return;
     }
 
+    // Validate password strength
+    const passwordValidation = validatePasswordStrength(password);
+    if (!passwordValidation.isValid) {
+      toast.error(`Weak password: ${passwordValidation.feedback.join(', ')}`);
+      setIsLoading(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
       setIsLoading(false);
@@ -156,6 +183,7 @@ const Auth = () => {
 
     try {
       await signUp(email, password, fullName, phoneNumber, userType);
+      resetRateLimit('auth'); // Reset on successful signup
     } catch (error) {
       console.error('Sign up error:', error);
     } finally {

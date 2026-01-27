@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollReveal } from '@/hooks/useScrollAnimation';
 import { supabase } from '@/integrations/supabase/client';
+import { checkRateLimit } from '@/lib/rate-limiter';
 import contactImage from '@/assets/contact-ticketing.jpg';
 
 const ContactUs = () => {
@@ -103,6 +104,17 @@ const ContactUs = () => {
     const isPhoneValid = validatePhone(formData.phone);
     
     if (!isNameValid || !isPhoneValid) {
+      return;
+    }
+
+    // Rate limiting check
+    const rateCheck = checkRateLimit('contact');
+    if (!rateCheck.allowed) {
+      toast({
+        title: 'Too Many Requests',
+        description: `Please wait ${rateCheck.retryAfter} seconds before sending another message.`,
+        variant: 'destructive',
+      });
       return;
     }
 
